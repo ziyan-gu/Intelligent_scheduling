@@ -18,7 +18,8 @@ import java.util.List;
 // 排班算法具体实现
 @Service
 public class scheduling_algorithm_impl implements scheduling_algorithm {
-/**    @Autowired
+/**
+    @Autowired
     Passenger_FlowDao passenger_flowDao;
     @Autowired
     Scheduling_RulesDao scheduling_rulesDao;
