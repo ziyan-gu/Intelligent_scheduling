@@ -1,6 +1,6 @@
 package com.backend.intelligent_scheduling_login.mapper;
 
-import com.backend.intelligent_scheduling_login.domain.User;
+import com.backend.intelligent_scheduling_login.model.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
