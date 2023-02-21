@@ -8,6 +8,4 @@ public class Store {
     private String name;
     private String address;
     private float size;
-    private String storeAdmin;
-    private String adminPassword;
 }
