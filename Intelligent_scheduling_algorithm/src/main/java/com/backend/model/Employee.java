@@ -9,4 +9,5 @@ public class Employee {
     private String email;
     private String position;
     private String store;
+    private String preferenceValue;
 }
