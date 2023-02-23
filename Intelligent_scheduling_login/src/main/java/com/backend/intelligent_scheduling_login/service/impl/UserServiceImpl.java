@@ -34,8 +34,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 
     @Override
-    public String userRegister(String account, String password, String checkPassword) {
-        if(StringUtils.isAnyBlank(account,password,checkPassword)){
+    public String userRegister(String account, String password, String checkPassword, String name) {
+        if(StringUtils.isAnyBlank(account,password,checkPassword,name)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
 
@@ -72,6 +72,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setPassword(encryptPassword);
         user.setType("admin");
         user.setId(UUID.randomUUID().toString());
+        user.setName(name);
         boolean saveResult = this.save(user);
         if(!saveResult){
             throw new BusinessException(ErrorCode.NO_AUTH,"保存失败");
