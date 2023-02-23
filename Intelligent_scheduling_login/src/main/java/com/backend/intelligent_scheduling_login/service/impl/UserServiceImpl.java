@@ -30,7 +30,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     private UserMapper userMapper;
 
-    private final static String SALT = "wxx";
+    private final static String SALT = "wx";
 
 
     @Override
