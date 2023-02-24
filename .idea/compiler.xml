@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="Intelligent_scheduling_login" />
         <module name="Intelligent_scheduling_algorithm" />
+        <module name="Intelligent_scheduling_employee_service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -19,6 +20,8 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Intelligent_scheduling_algorithm" options="-parameters" />
+      <module name="Intelligent_scheduling_employee_service" options="-parameters" />
+      <module name="Intelligent_scheduling_login" options="-parameters" />
       <module name="login_register" options="-parameters" />
     </option>
   </component>

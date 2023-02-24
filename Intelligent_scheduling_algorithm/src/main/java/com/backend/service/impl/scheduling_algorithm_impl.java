@@ -1,6 +1,7 @@
 package com.backend.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.backend.dao.*;
 import com.backend.model.*;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,10 +53,10 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         List<Fixed_Rules> fixed_rules = fixed_rulesDao.selectList(wrapper_fixedRule);
         System.out.println(fixed_rules);
         //获取门店面积
-        QueryWrapper<Store> wrapper_area = new QueryWrapper<>();
-        wrapper_area.eq("id",id);
-        Store area = storeDao.selectOne(wrapper_area);
-        System.out.println(area);
+        QueryWrapper<Store> wrapper_store = new QueryWrapper<>();
+        wrapper_store.eq("id",id);
+        Store store = storeDao.selectOne(wrapper_store);
+//        System.out.println(area);
         //获取客流量
 //        Date date = Date.valueOf("2023-5-10");
         QueryWrapper<Passenger_Flow> wrapper_flow = new QueryWrapper<>();
@@ -69,9 +71,10 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         //获取员工信息
         QueryWrapper<Employee> wrapper_employee = new QueryWrapper<>();
         wrapper_employee.eq("store",id);
+        wrapper_employee.eq("isDelete",0);
         List<Employee> employees = employeeDao.selectList(wrapper_employee);
-        System.out.println(employees);
-        //解析规则值
+//        System.out.println(employees);
+        //解析自定义规则值
         JSONObject open_rule = new JSONObject();
         JSONObject close_rule = new JSONObject();
         JSONObject flow_rule = new JSONObject();
@@ -86,10 +89,38 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 case "cashier" -> cashier_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
             }
         }
+        //解析固定规则值
+        JSONObject business_hours_rule = new JSONObject();
+        JSONObject working_hours_rule = new JSONObject();
+        JSONObject rest_time_rule = new JSONObject();
+        for (int i = 0; i < 3; i++) {
+            switch (fixed_rules.get(i).getRuleType()) {
+                case "business_hours" -> business_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
+                case "working_hours" -> working_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
+                case "rest_time" -> rest_time_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
+            }
+        }
+        //开店前进行多久准备工作
+        int open_time = (int) open_rule.get("pre");
+        //人数
+        int area = (int) store.getSize();
+        int open_rule_equ = (int) open_rule.get("equ");
+        int open_num = area / open_rule_equ + (area % open_rule_equ != 0 ? 1 : 0);
+        //关店后进行多久收尾工作
+        int close_time = (int) close_rule.get("end");
+///        System.out.println(close_rule.get("equ"));
+///        System.out.println(close_rule.get("equ").getClass());
+        JSONArray temp_json = (JSONArray) close_rule.get("equ");
+        List<Integer> close_num_equ = JSONArray.parseArray(temp_json.toString(),Integer.class);
+        int close_num = (area / close_num_equ.get(0) + (area % close_num_equ.get(0) != 0 ? 1 : 0)) + close_num_equ.get(1);
         //客流量解析
         for (Passenger_Flow passenger_flow : passenger_flows) {
             String data_str = passenger_flow.getData();
             JSONObject data = JSON.parseObject(data_str);
+            Date date = passenger_flow.getDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
+            String week = sdf.format(date);
+//            System.out.println(week);
             List<Integer> flow = new ArrayList<>();
             for (int i = 0; i < 26;) {
                 float temp_1 = data.getFloat(String.valueOf(i + 1));
@@ -101,8 +132,31 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 flow.add(temp);
                 i += 2;
             }
+            //获取上下班时间
+            List<Integer> up_down;
+            JSONArray up_down_json;
+            if (week.equals("星期六") || week.equals("星期日")) {
+                up_down_json = (JSONArray) business_hours_rule.get("dayoff");
+            }
+            else {
+                up_down_json = (JSONArray) business_hours_rule.get("workingday");
+            }
+            up_down = JSONArray.parseArray(up_down_json.toString(),Integer.class);
+            //持续时长
+            int all_time = up_down.get(1) - up_down.get(0) + open_time + close_time;
+            System.out.println(up_down);
+            //逐小时排班
+            for (int i = 0; i < all_time; i++) {
+                
+                System.out.println("");
+            }
             System.out.println(flow);
         }
+
+
+
+
+
         return passenger_flows.get(0);
     }
 
