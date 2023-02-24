@@ -2,10 +2,13 @@ package com.backend.intelligent_scheduling_employee_service.service.impl;
 
 import com.backend.intelligent_scheduling_employee_service.common.UserInfoCheckUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.backend.intelligent_scheduling_employee_service.model.Employee;
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.backend.intelligent_scheduling_employee_service.mapper.EmployeeMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -57,6 +60,23 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
             return null;
         }
         return employee.getId();
+    }
+
+    @Override
+    public Boolean modifyEmployeePreferenceService(String id, Employee employee) throws JsonProcessingException {
+
+        Employee oldEmployee = this.getOne(new QueryWrapper<Employee>().eq("id", id));
+
+        //hashmap -> json
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(employee.getPreferenceValue());
+        oldEmployee.setPreferenceValue(json);
+
+        UpdateWrapper<Employee> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id",id);
+        boolean result = this.update(oldEmployee,updateWrapper);
+
+        return result;
     }
 }
 

@@ -1,13 +1,15 @@
 package com.backend.intelligent_scheduling_employee_service.controller;
 
 import com.alibaba.nacos.common.utils.StringUtils;
+import com.backend.intelligent_scheduling_employee_service.common.BaseResponse;
+import com.backend.intelligent_scheduling_employee_service.common.ErrorCode;
+import com.backend.intelligent_scheduling_employee_service.common.ResultUtils;
+import com.backend.intelligent_scheduling_employee_service.exception.BusinessException;
 import com.backend.intelligent_scheduling_employee_service.model.Employee;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeAddRequest;
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,21 +23,21 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @DeleteMapping("/{id}")
-    public String deleteEmployee(@PathVariable String id) {
+    public BaseResponse<Boolean> deleteEmployee(@PathVariable String id) {
         if(id == null){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         if (StringUtils.isAnyBlank(id)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
         }
-        employeeService.remove(new QueryWrapper<Employee>().eq("id", id));
-        return "ok";
+        boolean result = employeeService.remove(new QueryWrapper<Employee>().eq("id", id));
+        return ResultUtils.success(result);
     }
 
     @PostMapping
-    public String addEmployee(@RequestBody EmployeeAddRequest employeeAddRequest){
+    public BaseResponse<String> addEmployee(@RequestBody EmployeeAddRequest employeeAddRequest){
         if(employeeAddRequest == null){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         String id = employeeAddRequest.getId();
         String name = employeeAddRequest.getName();
@@ -44,12 +46,12 @@ public class EmployeeController {
         String store = employeeAddRequest.getStore();
 
         if(StringUtils.isAnyBlank(id,name,email,position.toString(),store)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
         }
 
         String result = employeeService.addEmployee(id, name, email, position, store);
 
-        return "ok";
+        return ResultUtils.success(result);
 
 
     }
@@ -65,39 +67,30 @@ public class EmployeeController {
 //    }
 
     @GetMapping
-    public List<Employee> getAllEmployees(){
+    public BaseResponse<List<Employee>> getAllEmployees(){
         List<Employee> employees = employeeService.list();
         employees.forEach(employee -> employee.setPassword(null));
-        return employees;
+        return ResultUtils.success(employees);
     }
 
     @GetMapping("/{id}")
-    public Employee getEmployee(@PathVariable String id){
+    public BaseResponse<Employee> getEmployee(@PathVariable String id){
         if(id == null || StringUtils.isAnyBlank(id)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空或存在非法字符");
         }
         Employee employee = employeeService.getOne(new QueryWrapper<Employee>().eq("id", id));
         employee.setPassword(null);
-        return employee;
+        return ResultUtils.success(employee);
     }
 
     @PutMapping("/prefer/{id}")
-    public String modifyEmployeePreference(@PathVariable String id,@RequestBody Employee employee) throws JsonProcessingException {
+    public BaseResponse<Boolean> modifyEmployeePreference(@PathVariable String id, @RequestBody Employee employee) throws JsonProcessingException {
         if(id == null || StringUtils.isAnyBlank(id)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空或存在非法字符");
         }
 
-        Employee oldEmployee = employeeService.getOne(new QueryWrapper<Employee>().eq("id", id));
+        boolean result = employeeService.modifyEmployeePreferenceService(id,employee);
 
-        //hashmap -> json
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(employee.getPreferenceValue());
-        oldEmployee.setPreferenceValue(json);
-
-        UpdateWrapper<Employee> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id",id);
-        boolean result = employeeService.update(oldEmployee,updateWrapper);
-
-        return "ok";
+        return ResultUtils.success(result);
     }
 }

@@ -2,6 +2,7 @@ package com.backend.intelligent_scheduling_employee_service.service;
 
 import com.backend.intelligent_scheduling_employee_service.model.Employee;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
 * @author 86136
@@ -21,4 +22,11 @@ public interface EmployeeService extends IService<Employee> {
      */
     String addEmployee(String id, String name, String email, Integer position, String store);
 
+    /**
+     *
+     * @param id 用户id
+     * @param employee 用户信息
+     * @return 是否成功
+     */
+    Boolean modifyEmployeePreferenceService(String id, Employee employee) throws JsonProcessingException;
 }
