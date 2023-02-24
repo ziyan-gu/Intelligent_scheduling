@@ -42,38 +42,51 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         this.storeDao = storeDao;
     }
 
+    private List<Fixed_Rules> getFixed_rule(String str_admin) {
+        QueryWrapper<Fixed_Rules> wrapper_fixedRule = new QueryWrapper<>();
+        wrapper_fixedRule.eq("admin",str_admin);
+        return fixed_rulesDao.selectList(wrapper_fixedRule);
+    }
 
+    private Store getStore(String id) {
+        QueryWrapper<Store> wrapper_store = new QueryWrapper<>();
+        wrapper_store.eq("id",id);
+        return storeDao.selectOne(wrapper_store);
+    }
+
+    private List<Passenger_Flow> getPassenger_Flow(String id) {
+        QueryWrapper<Passenger_Flow> wrapper_flow = new QueryWrapper<>();
+        wrapper_flow.eq("id",id);
+        return passenger_flowDao.selectList(wrapper_flow);
+    }
+
+    private List<Scheduling_Rules> getScheduling_Rules(String id) {
+        QueryWrapper<Scheduling_Rules> wrapper_rule = new QueryWrapper<>();
+        wrapper_rule.eq("store",id);
+        return scheduling_rulesDao.selectList(wrapper_rule);
+    }
+
+    private List<Employee> getEmployee(String id) {
+        QueryWrapper<Employee> wrapper_employee = new QueryWrapper<>();
+        wrapper_employee.eq("store",id);
+        wrapper_employee.eq("isDelete",0);
+        return employeeDao.selectList(wrapper_employee);
+    }
     // 生成班次
     @Override
     public Object generation_shift(String id) {
         String[] str_admin = id.split("_",2);
         //获取固定规则
-        QueryWrapper<Fixed_Rules> wrapper_fixedRule = new QueryWrapper<>();
-        wrapper_fixedRule.eq("admin",str_admin[0]);
-        List<Fixed_Rules> fixed_rules = fixed_rulesDao.selectList(wrapper_fixedRule);
+        List<Fixed_Rules> fixed_rules = getFixed_rule(str_admin[0]);
         System.out.println(fixed_rules);
-        //获取门店面积
-        QueryWrapper<Store> wrapper_store = new QueryWrapper<>();
-        wrapper_store.eq("id",id);
-        Store store = storeDao.selectOne(wrapper_store);
-//        System.out.println(area);
+        //获取门店信息
+        Store store = getStore(id);
         //获取客流量
-//        Date date = Date.valueOf("2023-5-10");
-        QueryWrapper<Passenger_Flow> wrapper_flow = new QueryWrapper<>();
-        wrapper_flow.eq("id",id);
-//        wrapper.eq("date",date);
-        List<Passenger_Flow> passenger_flows = passenger_flowDao.selectList(wrapper_flow);
+        List<Passenger_Flow> passenger_flows = getPassenger_Flow(id);
         //获取自定义规则
-        QueryWrapper<Scheduling_Rules> wrapper_rule = new QueryWrapper<>();
-        wrapper_rule.eq("store",id);
-        List<Scheduling_Rules> scheduling_rules = scheduling_rulesDao.selectList(wrapper_rule);
-        System.out.println(scheduling_rules);
+        List<Scheduling_Rules> scheduling_rules = getScheduling_Rules(id);
         //获取员工信息
-        QueryWrapper<Employee> wrapper_employee = new QueryWrapper<>();
-        wrapper_employee.eq("store",id);
-        wrapper_employee.eq("isDelete",0);
-        List<Employee> employees = employeeDao.selectList(wrapper_employee);
-//        System.out.println(employees);
+        List<Employee> employees = getEmployee(id);
         //解析自定义规则值
         JSONObject open_rule = new JSONObject();
         JSONObject close_rule = new JSONObject();
@@ -108,8 +121,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         int open_num = area / open_rule_equ + (area % open_rule_equ != 0 ? 1 : 0);
         //关店后进行多久收尾工作
         int close_time = (int) close_rule.get("end");
-///        System.out.println(close_rule.get("equ"));
-///        System.out.println(close_rule.get("equ").getClass());
         JSONArray temp_json = (JSONArray) close_rule.get("equ");
         List<Integer> close_num_equ = JSONArray.parseArray(temp_json.toString(),Integer.class);
         int close_num = (area / close_num_equ.get(0) + (area % close_num_equ.get(0) != 0 ? 1 : 0)) + close_num_equ.get(1);
@@ -120,7 +131,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             Date date = passenger_flow.getDate();
             SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
             String week = sdf.format(date);
-//            System.out.println(week);
             List<Integer> flow = new ArrayList<>();
             for (int i = 0; i < 26;) {
                 float temp_1 = data.getFloat(String.valueOf(i + 1));
@@ -144,13 +154,113 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             up_down = JSONArray.parseArray(up_down_json.toString(),Integer.class);
             //持续时长
             int all_time = up_down.get(1) - up_down.get(0) + open_time + close_time;
-            System.out.println(up_down);
             //逐小时排班
+            JSONArray short_long = (JSONArray) working_hours_rule.get("c");
+            int short_time = (int) short_long.get(0);
+            int long_time = (int) short_long.get(1);
+            List<Integer> scheduling = new ArrayList<>();
+            List<Integer> scheduling_time = new ArrayList<>();
+            List<Integer> current = new ArrayList<>();
             for (int i = 0; i < all_time; i++) {
-                
-                System.out.println("");
+                System.out.println(i);
+                if (i < open_time) {
+                    for (int j = 0; j < open_num; j++) {
+                        scheduling.add(1);
+                        scheduling_time.add(up_down.get(0) - open_time + i);
+                        scheduling_time.add(up_down.get(0) - open_time + i + 1);
+                        current.add(i * open_num + j);
+                    }
+                }
+                else if (i >= all_time - close_time) {
+
+                }
+                else {
+                    List<Integer> delete_index = new ArrayList<>();
+                    for (int j = 0; j < current.size(); j++) {
+                        if (scheduling.get(current.get(j)) == long_time) {
+                            delete_index.add(j);
+                        }
+                    }
+                    System.out.print("delete_index: ");
+                    System.out.println(delete_index);
+                    System.out.print("current: ");
+                    System.out.println(current);
+                    System.out.print("scheduling: ");
+                    System.out.println(scheduling);
+                    for (int j = delete_index.size() - 1; j > -1; j--) {
+                        current.remove(delete_index.get(j));
+                    }
+                    System.out.println("删除后");
+                    System.out.print("delete_index: ");
+                    System.out.println(delete_index);
+                    System.out.print("current: ");
+                    System.out.println(current);
+                    System.out.print("scheduling: ");
+                    System.out.println(scheduling);
+                    List<Integer> short_num = new ArrayList<>();
+                    for (int j = 0 ;j < current.size(); j++) {
+                        if (scheduling.get(current.get(j)) < short_time) {
+                            int temp_1 = scheduling.get(current.get(j));
+                            scheduling.set(current.get(j), temp_1 + 1);
+                            int temp_2 = scheduling_time.get(current.get(j) * 2 + 1);
+                            scheduling_time.set(current.get(j) * 2 + 1, temp_2 + 1);
+                            short_num.add(j);
+                        }
+                    }
+                    if (short_num.size() < flow.get(i - open_time)) {
+                        int pag = flow.get(i - open_time) - short_num.size();
+                        if (current.size() - short_num.size() >= pag) {
+                            int k = 0;
+                            for (int j = 0; j < pag; j++) {
+                                if (!short_num.contains(current.get(k))) {
+                                    int temp = scheduling.get(current.get(k));
+                                    int temp_2 = scheduling_time.get(current.get(k) * 2 + 1);
+                                    scheduling.set(current.get(k), temp + 1);
+                                    scheduling_time.set(current.get(k) * 2 + 1, temp_2 + 1);
+                                    k++;
+                                }
+                                else {
+                                    k++;
+                                    j--;
+                                }
+                            }
+                            int p = current.size() - 1;
+                            for (int j = 0; j < current.size() - pag - short_num.size(); j++) {
+                                if (!short_num.contains(current.get(p))) {
+                                    current.remove(p);
+                                    p--;
+                                }
+                                else {
+                                    p--;
+                                    j--;
+                                }
+                            }
+                        }
+                        else {
+                            int pag_pag = pag - current.size() - short_num.size();
+                            for (int j = 0; j < current.size() - short_num.size(); j++) {
+                                if (!short_num.contains(current.get(j))) {
+                                    int temp_2 = scheduling_time.get(current.get(j) * 2 + 1);
+                                    scheduling_time.set(current.get(j) * 2 + 1, temp_2 + 1);
+                                    int temp = scheduling.get(current.get(j));
+                                    scheduling.set(current.get(j), temp + 1);
+                                }
+                            }
+                            for (int j = 0; j < pag_pag; j++) {
+                                scheduling.add(1);
+                                scheduling_time.add(up_down.get(0) + i);
+                                scheduling_time.add(up_down.get(1) + i + 1);
+                                current.add(scheduling.size() - 1);
+                            }
+                        }
+
+                    }
+                }
             }
             System.out.println(flow);
+            System.out.println(scheduling);
+            System.out.println(scheduling_time);
+            System.out.println(current);
         }
 
 
