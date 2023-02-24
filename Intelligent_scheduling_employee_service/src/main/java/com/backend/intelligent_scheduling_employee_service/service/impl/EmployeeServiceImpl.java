@@ -45,6 +45,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         String password = "123456";
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
+        employee.setId(id);
         employee.setName(name);
         employee.setEmail(email);
         employee.setPassword(encryptPassword);

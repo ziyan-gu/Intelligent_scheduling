@@ -5,8 +5,13 @@ import com.backend.intelligent_scheduling_employee_service.model.Employee;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeAddRequest;
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/employees")
@@ -20,7 +25,7 @@ public class EmployeeController {
         if(id == null){
             return null;
         }
-        if (StringUtils.isAnyBlank(id.toString())){
+        if (StringUtils.isAnyBlank(id)){
             return null;
         }
         employeeService.remove(new QueryWrapper<Employee>().eq("id", id));
@@ -49,5 +54,50 @@ public class EmployeeController {
 
     }
 
+//    @PutMapping("/{id}")
+//    public String modifyEmployee(@PathVariable String id, @RequestBody Employee employee){
+//        if (id == null || employee == null || StringUtils.isAnyBlank(id)) {
+//            return null;
+//        }
+//
+//        boolean result = employeeService.update(employee, new UpdateWrapper<Employee>().eq("id", id));
+//        return "ok";
+//    }
 
+    @GetMapping
+    public List<Employee> getAllEmployees(){
+        List<Employee> employees = employeeService.list();
+        employees.forEach(employee -> employee.setPassword(null));
+        return employees;
+    }
+
+    @GetMapping("/{id}")
+    public Employee getEmployee(@PathVariable String id){
+        if(id == null || StringUtils.isAnyBlank(id)){
+            return null;
+        }
+        Employee employee = employeeService.getOne(new QueryWrapper<Employee>().eq("id", id));
+        employee.setPassword(null);
+        return employee;
+    }
+
+    @PutMapping("/prefer/{id}")
+    public String modifyEmployeePreference(@PathVariable String id,@RequestBody Employee employee) throws JsonProcessingException {
+        if(id == null || StringUtils.isAnyBlank(id)){
+            return null;
+        }
+
+        Employee oldEmployee = employeeService.getOne(new QueryWrapper<Employee>().eq("id", id));
+
+        //hashmap -> json
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(employee.getPreferenceValue());
+        oldEmployee.setPreferenceValue(json);
+
+        UpdateWrapper<Employee> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id",id);
+        boolean result = employeeService.update(oldEmployee,updateWrapper);
+
+        return "ok";
+    }
 }
