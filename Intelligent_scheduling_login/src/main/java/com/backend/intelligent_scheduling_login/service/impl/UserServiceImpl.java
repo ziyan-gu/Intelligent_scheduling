@@ -110,7 +110,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //用户不存在
         if (user == null) {
             //log.info("user login failed, account cannot match password");
-            throw new BusinessException(ErrorCode.NULL_ERROR,"该用户不存在");
+            throw new BusinessException(ErrorCode.NULL_ERROR,"该用户不存在或密码错误");
         }
 
         User safetyUser = getSafeUser(user);
