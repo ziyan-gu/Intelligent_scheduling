@@ -163,12 +163,17 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             List<Integer> current = new ArrayList<>();
             for (int i = 0; i < all_time; i++) {
                 System.out.println(i);
-                if (i < open_time) {
+                if (i < open_time && i == 0) {
                     for (int j = 0; j < open_num; j++) {
                         scheduling.add(1);
                         scheduling_time.add(up_down.get(0) - open_time + i);
                         scheduling_time.add(up_down.get(0) - open_time + i + 1);
-                        current.add(i * open_num + j);
+                        current.add(j);
+                    }
+                }
+                else if (i < open_time) {
+                    for (int j = 0; j < current.size(); j++) {
+                        extended_schedule(scheduling, scheduling_time, current, j);
                     }
                 }
                 else if (i >= all_time - close_time) {
@@ -176,35 +181,26 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 }
                 else {
                     List<Integer> delete_index = new ArrayList<>();
-                    for (int j = 0; j < current.size(); j++) {
-                        if (scheduling.get(current.get(j)) == long_time) {
-                            delete_index.add(j);
+                    for (Integer integer : current) {
+                        if (scheduling.get(integer) == long_time) {
+                            delete_index.add(integer);
                         }
                     }
-                    System.out.print("delete_index: ");
-                    System.out.println(delete_index);
-                    System.out.print("current: ");
-                    System.out.println(current);
+                    System.out.println(flow);
                     System.out.print("scheduling: ");
                     System.out.println(scheduling);
+                    System.out.print("current: ");
+                    System.out.println(current);
+                    System.out.print("delete_index: ");
+                    System.out.println(delete_index);
                     for (int j = delete_index.size() - 1; j > -1; j--) {
                         current.remove(delete_index.get(j));
                     }
-                    System.out.println("删除后");
-                    System.out.print("delete_index: ");
-                    System.out.println(delete_index);
-                    System.out.print("current: ");
-                    System.out.println(current);
-                    System.out.print("scheduling: ");
-                    System.out.println(scheduling);
                     List<Integer> short_num = new ArrayList<>();
                     for (int j = 0 ;j < current.size(); j++) {
                         if (scheduling.get(current.get(j)) < short_time) {
-                            int temp_1 = scheduling.get(current.get(j));
-                            scheduling.set(current.get(j), temp_1 + 1);
-                            int temp_2 = scheduling_time.get(current.get(j) * 2 + 1);
-                            scheduling_time.set(current.get(j) * 2 + 1, temp_2 + 1);
-                            short_num.add(j);
+                            extended_schedule(scheduling, scheduling_time, current, j);
+                            short_num.add(current.get(j));
                         }
                     }
                     if (short_num.size() < flow.get(i - open_time)) {
@@ -213,10 +209,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                             int k = 0;
                             for (int j = 0; j < pag; j++) {
                                 if (!short_num.contains(current.get(k))) {
-                                    int temp = scheduling.get(current.get(k));
-                                    int temp_2 = scheduling_time.get(current.get(k) * 2 + 1);
-                                    scheduling.set(current.get(k), temp + 1);
-                                    scheduling_time.set(current.get(k) * 2 + 1, temp_2 + 1);
+                                    extended_schedule(scheduling, scheduling_time, current, k);
                                     k++;
                                 }
                                 else {
@@ -237,25 +230,29 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                             }
                         }
                         else {
-                            int pag_pag = pag - current.size() - short_num.size();
+                            int pag_pag = pag - current.size() + short_num.size();
                             for (int j = 0; j < current.size() - short_num.size(); j++) {
                                 if (!short_num.contains(current.get(j))) {
-                                    int temp_2 = scheduling_time.get(current.get(j) * 2 + 1);
-                                    scheduling_time.set(current.get(j) * 2 + 1, temp_2 + 1);
-                                    int temp = scheduling.get(current.get(j));
-                                    scheduling.set(current.get(j), temp + 1);
+                                    extended_schedule(scheduling, scheduling_time, current, j);
                                 }
                             }
                             for (int j = 0; j < pag_pag; j++) {
                                 scheduling.add(1);
                                 scheduling_time.add(up_down.get(0) + i);
-                                scheduling_time.add(up_down.get(1) + i + 1);
+                                scheduling_time.add(up_down.get(0) + i + 1);
                                 current.add(scheduling.size() - 1);
                             }
                         }
 
                     }
                 }
+                System.out.println("删除后");
+                System.out.print("scheduling: ");
+                System.out.println(scheduling);
+                System.out.print("current: ");
+                System.out.println(current);
+                System.out.print("scheduling_time: ");
+                System.out.println(scheduling_time);
             }
             System.out.println(flow);
             System.out.println(scheduling);
@@ -268,6 +265,13 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
 
 
         return passenger_flows.get(0);
+    }
+
+    private void extended_schedule(List<Integer> scheduling, List<Integer> scheduling_time, List<Integer> current, int j) {
+        int temp_time = scheduling_time.get(current.get(j) * 2 + 1);
+        int temp_current = scheduling.get(current.get(j));
+        scheduling_time.set(current.get(j) * 2 + 1,temp_time + 1);
+        scheduling.set(current.get(j), temp_current + 1);
     }
 
     // 生成排班表
