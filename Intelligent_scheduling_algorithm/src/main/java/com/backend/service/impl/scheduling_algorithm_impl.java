@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +21,22 @@ import java.util.List;
 @Service
 public class scheduling_algorithm_impl implements scheduling_algorithm {
 
-///    @Autowired
-///    Passenger_FlowDao passenger_flowDao;
-///    @Autowired
-///    Scheduling_RulesDao scheduling_rulesDao;
+    //固定规则
+    private List<Fixed_Rules> fixed_rules = new ArrayList<>();
+    //员工信息
+    private List<Employee> employees = new ArrayList<>();
+    //自定义规则值
+    private List<Scheduling_Rules> scheduling_rules = new ArrayList<>();
+    //解析自定义规则值
+    private JSONObject open_rule = new JSONObject();
+    private JSONObject close_rule = new JSONObject();
+    private JSONObject flow_rule = new JSONObject();
+    private JSONObject on_duty_rule = new JSONObject();
+    private JSONObject cashier_rule = new JSONObject();
+    //解析固定规则值
+    private JSONObject business_hours_rule = new JSONObject();
+    private JSONObject working_hours_rule = new JSONObject();
+    private JSONObject rest_time_rule = new JSONObject();
 
     private final Passenger_FlowDao passenger_flowDao;
     private final Scheduling_RulesDao scheduling_rulesDao;
@@ -78,23 +92,19 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     // 生成班次
     @Override
     public Object generation_shift(String id) {
+        LocalTime time_1 = LocalTime.now();
         String[] str_admin = id.split("_",2);
         //获取固定规则
-        List<Fixed_Rules> fixed_rules = getFixed_rule(str_admin[0]);
+        fixed_rules = getFixed_rule(str_admin[0]);
         //获取门店信息
         Store store = getStore(id);
         //获取客流量
         List<Passenger_Flow> passenger_flows = getPassenger_Flow(id);
         //获取自定义规则
-        List<Scheduling_Rules> scheduling_rules = getScheduling_Rules(id);
+        scheduling_rules = getScheduling_Rules(id);
         //获取员工信息
-        List<Employee> employees = getEmployee(id);
-        //解析自定义规则值
-        JSONObject open_rule = new JSONObject();
-        JSONObject close_rule = new JSONObject();
-        JSONObject flow_rule = new JSONObject();
-        JSONObject on_duty_rule = new JSONObject();
-        JSONObject cashier_rule = new JSONObject();
+        employees = getEmployee(id);
+
         for (int i = 0; i < 5; i++) {
             switch (scheduling_rules.get(i).getRuleType()) {
                 case "open" -> open_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
@@ -104,10 +114,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 case "cashier" -> cashier_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
             }
         }
-        //解析固定规则值
-        JSONObject business_hours_rule = new JSONObject();
-        JSONObject working_hours_rule = new JSONObject();
-        JSONObject rest_time_rule = new JSONObject();
+
         for (int i = 0; i < 3; i++) {
             switch (fixed_rules.get(i).getRuleType()) {
                 case "business_hours" -> business_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
@@ -259,11 +266,9 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             System.out.println(scheduling_time);
             System.out.println(current);
         }
-
-
-
-
-
+        LocalTime time_2 = LocalTime.now();
+        Duration duration = Duration.between(time_2,time_1);
+        System.out.println(duration);
         return passenger_flows.get(0);
     }
 
