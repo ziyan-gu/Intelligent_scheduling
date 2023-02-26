@@ -7,12 +7,14 @@ import com.backend.intelligent_scheduling_employee_service.common.ResultUtils;
 import com.backend.intelligent_scheduling_employee_service.exception.BusinessException;
 import com.backend.intelligent_scheduling_employee_service.model.Employee;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeAddRequest;
+import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeLoginRequest;
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -92,5 +94,21 @@ public class EmployeeController {
         boolean result = employeeService.modifyEmployeePreferenceService(id,employee);
 
         return ResultUtils.success(result);
+    }
+
+    @PostMapping("/login")
+    public BaseResponse<Employee> userLogin(@RequestBody EmployeeLoginRequest employeeLoginRequest,
+                                            HttpServletRequest request) {
+        if (employeeLoginRequest == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
+        }
+        String email = employeeLoginRequest.getEmail();
+        String password = employeeLoginRequest.getPassword();
+
+        if (StringUtils.isAnyBlank(email,password)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"输入存在空格");
+        }
+        Employee employee = employeeService.employeeLogin(email, password, request);
+        return ResultUtils.success(employee);
     }
 }

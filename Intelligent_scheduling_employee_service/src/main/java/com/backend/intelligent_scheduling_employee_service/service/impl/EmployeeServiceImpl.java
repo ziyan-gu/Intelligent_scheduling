@@ -1,6 +1,9 @@
 package com.backend.intelligent_scheduling_employee_service.service.impl;
 
+import com.alibaba.nacos.common.utils.StringUtils;
+import com.backend.intelligent_scheduling_employee_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_employee_service.common.UserInfoCheckUtil;
+import com.backend.intelligent_scheduling_employee_service.exception.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
 * @author 86136
@@ -25,6 +29,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
     private final static String SALT = "wx";
 
+    public String USER_LOGIN_STATE = "userLoginState";
     @Resource
     public EmployeeMapper employeeMapper;
     @Override
@@ -77,6 +82,53 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         boolean result = this.update(oldEmployee,updateWrapper);
 
         return result;
+    }
+
+    @Override
+    public Employee employeeLogin(String email, String password, HttpServletRequest request) {
+        if(StringUtils.isAnyBlank(email,password)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
+        }
+        if (password.length() < 6){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户密码过短");
+        }
+
+        //2.加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        //查询用户是否存在
+        QueryWrapper<Employee> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email", email);
+        queryWrapper.eq("password", encryptPassword);
+        Employee employee = employeeMapper.selectOne(queryWrapper);
+        //用户不存在
+        if (employee == null) {
+            //log.info("user login failed, account cannot match password");
+            throw new BusinessException(ErrorCode.NULL_ERROR,"该用户不存在或密码错误");
+        }
+
+        Employee safetyEmployee = getSafeEmployee(employee);
+
+        //4.记录用户登录状态
+        request.getSession().setAttribute(USER_LOGIN_STATE,employee);
+
+        return safetyEmployee;
+    }
+
+    @Override
+    public Employee getSafeEmployee(Employee originEmployee) {
+        if (originEmployee == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"该用户不存在");
+        }
+        Employee safetyEmployee = new Employee();
+        safetyEmployee.setId(originEmployee.getId());
+        safetyEmployee.setName(originEmployee.getName());
+        safetyEmployee.setEmail(originEmployee.getEmail());
+        safetyEmployee.setPosition(originEmployee.getPosition());
+        safetyEmployee.setStore(originEmployee.getStore());
+        safetyEmployee.setPreferenceValue(originEmployee.getPreferenceValue());
+
+
+        return safetyEmployee;
     }
 }
 
