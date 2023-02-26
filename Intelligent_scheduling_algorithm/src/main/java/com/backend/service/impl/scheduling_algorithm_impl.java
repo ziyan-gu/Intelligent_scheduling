@@ -29,17 +29,20 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     private final EmployeeDao employeeDao;
     private final Fixed_RulesDao fixed_rulesDao;
     private final StoreDao storeDao;
+    private final SchedulingDao schedulingDao;
     @Autowired
     public scheduling_algorithm_impl(Passenger_FlowDao passenger_flowDao,
                                      Scheduling_RulesDao scheduling_rulesDao,
                                      EmployeeDao employeeDao,
                                      Fixed_RulesDao fixed_rulesDao,
-                                     StoreDao storeDao) {
+                                     StoreDao storeDao,
+                                     SchedulingDao schedulingDao) {
         this.passenger_flowDao = passenger_flowDao;
         this.scheduling_rulesDao = scheduling_rulesDao;
         this.employeeDao = employeeDao;
         this.fixed_rulesDao = fixed_rulesDao;
         this.storeDao = storeDao;
+        this.schedulingDao = schedulingDao;
     }
 
     private List<Fixed_Rules> getFixed_rule(String str_admin) {
@@ -78,7 +81,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         String[] str_admin = id.split("_",2);
         //获取固定规则
         List<Fixed_Rules> fixed_rules = getFixed_rule(str_admin[0]);
-        System.out.println(fixed_rules);
         //获取门店信息
         Store store = getStore(id);
         //获取客流量
@@ -162,7 +164,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             List<Integer> scheduling_time = new ArrayList<>();
             List<Integer> current = new ArrayList<>();
             for (int i = 0; i < all_time; i++) {
-                System.out.println(i);
                 if (i < open_time && i == 0) {
                     for (int j = 0; j < open_num; j++) {
                         scheduling.add(1);
@@ -177,7 +178,24 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     }
                 }
                 else if (i >= all_time - close_time) {
-
+                    List<Integer> short_num = new ArrayList<>();
+                    int temp = 0;
+                    for (int j = 0 ;j < current.size(); j++) {
+                        if (scheduling.get(current.get(j)) < short_time) {
+                            extended_schedule(scheduling, scheduling_time, current, j);
+                            short_num.add(current.get(j));
+                            temp++;
+                        }
+                    }
+                    if (temp < close_num) {
+                        int pag = close_num - temp;
+                        if (current.size() - temp >= pag) {
+                            increase_inTurn(scheduling, scheduling_time, current, short_num, pag);
+                        }
+                        else {
+                            residual_addition(up_down, scheduling, scheduling_time, current, i, short_num, pag);
+                        }
+                    }
                 }
                 else {
                     List<Integer> delete_index = new ArrayList<>();
@@ -186,13 +204,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                             delete_index.add(integer);
                         }
                     }
-                    System.out.println(flow);
-                    System.out.print("scheduling: ");
-                    System.out.println(scheduling);
-                    System.out.print("current: ");
-                    System.out.println(current);
-                    System.out.print("delete_index: ");
-                    System.out.println(delete_index);
                     for (int j = delete_index.size() - 1; j > -1; j--) {
                         current.remove(delete_index.get(j));
                     }
@@ -206,54 +217,43 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     if (short_num.size() < flow.get(i - open_time)) {
                         int pag = flow.get(i - open_time) - short_num.size();
                         if (current.size() - short_num.size() >= pag) {
-                            int k = 0;
-                            for (int j = 0; j < pag; j++) {
-                                if (!short_num.contains(current.get(k))) {
-                                    extended_schedule(scheduling, scheduling_time, current, k);
-                                    k++;
-                                }
-                                else {
-                                    k++;
-                                    j--;
-                                }
-                            }
-                            int p = current.size() - 1;
-                            for (int j = 0; j < current.size() - pag - short_num.size(); j++) {
-                                if (!short_num.contains(current.get(p))) {
-                                    current.remove(p);
-                                    p--;
-                                }
-                                else {
-                                    p--;
-                                    j--;
-                                }
-                            }
+                            increase_inTurn(scheduling, scheduling_time, current, short_num, pag);
                         }
                         else {
-                            int pag_pag = pag - current.size() + short_num.size();
-                            for (int j = 0; j < current.size() - short_num.size(); j++) {
-                                if (!short_num.contains(current.get(j))) {
-                                    extended_schedule(scheduling, scheduling_time, current, j);
-                                }
-                            }
-                            for (int j = 0; j < pag_pag; j++) {
-                                scheduling.add(1);
-                                scheduling_time.add(up_down.get(0) + i - 1);
-                                scheduling_time.add(up_down.get(0) + i);
-                                current.add(scheduling.size() - 1);
-                            }
+                            residual_addition(up_down, scheduling, scheduling_time, current, i, short_num, pag);
                         }
 
                     }
                 }
-                System.out.println("删除后");
-                System.out.print("scheduling: ");
-                System.out.println(scheduling);
-                System.out.print("current: ");
-                System.out.println(current);
-                System.out.print("scheduling_time: ");
-                System.out.println(scheduling_time);
             }
+            JSONObject up_data = new JSONObject();
+            int total = scheduling.size();
+            up_data.put("total", total);
+            for (int i = 1; i <= total; i++) {
+                JSONArray data_people = new JSONArray();
+                data_people.add(scheduling_time.get((i - 1) * 2));
+                data_people.add(scheduling_time.get((i - 1) * 2 + 1));
+                data_people.add("0");
+                up_data.put(String.valueOf(i),data_people);
+            }
+            Scheduling scheduling_up = new Scheduling();
+            scheduling_up.setId(id);
+            scheduling_up.setDate(String.valueOf(date));
+            scheduling_up.setData(String.valueOf(up_data));
+            QueryWrapper<Scheduling> wrapper_scheduling = new QueryWrapper<>();
+            wrapper_scheduling.eq("id",id);
+            wrapper_scheduling.eq("date",date);
+            System.out.println(date);
+            System.out.println(schedulingDao.exists(wrapper_scheduling));
+            if (schedulingDao.exists(wrapper_scheduling)) {
+                schedulingDao.update(scheduling_up,wrapper_scheduling);
+            }
+            else {
+                schedulingDao.insert(scheduling_up);
+            }
+
+
+
             System.out.println(flow);
             System.out.println(scheduling);
             System.out.println(scheduling_time);
@@ -267,6 +267,49 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         return passenger_flows.get(0);
     }
 
+    //当前剩余增加，新增
+    private void residual_addition(List<Integer> up_down, List<Integer> scheduling, List<Integer> scheduling_time, List<Integer> current, int i, List<Integer> short_num, int pag) {
+        int pag_pag = pag - current.size() + short_num.size();
+        for (int j = 0; j < current.size() - short_num.size(); j++) {
+            if (!short_num.contains(current.get(j))) {
+                extended_schedule(scheduling, scheduling_time, current, j);
+            }
+        }
+        for (int j = 0; j < pag_pag; j++) {
+            scheduling.add(1);
+            scheduling_time.add(up_down.get(0) + i - 1);
+            scheduling_time.add(up_down.get(0) + i);
+            current.add(scheduling.size() - 1);
+        }
+    }
+
+    //依次新增
+    private void increase_inTurn(List<Integer> scheduling, List<Integer> scheduling_time, List<Integer> current, List<Integer> short_num, int pag) {
+        int k = 0;
+        for (int j = 0; j < pag; j++) {
+            if (!short_num.contains(current.get(k))) {
+                extended_schedule(scheduling, scheduling_time, current, k);
+                k++;
+            }
+            else {
+                k++;
+                j--;
+            }
+        }
+        int p = current.size() - 1;
+        for (int j = 0; j < current.size() - pag - short_num.size(); j++) {
+            if (!short_num.contains(current.get(p))) {
+                current.remove(p);
+                p--;
+            }
+            else {
+                p--;
+                j--;
+            }
+        }
+    }
+
+    //当前新增
     private void extended_schedule(List<Integer> scheduling, List<Integer> scheduling_time, List<Integer> current, int j) {
         int temp_time = scheduling_time.get(current.get(j) * 2 + 1);
         int temp_current = scheduling.get(current.get(j));
