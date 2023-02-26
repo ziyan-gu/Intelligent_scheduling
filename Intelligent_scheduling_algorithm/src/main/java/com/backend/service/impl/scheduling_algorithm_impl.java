@@ -132,16 +132,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
             String week = sdf.format(date);
             List<Integer> flow = new ArrayList<>();
-            for (int i = 0; i < 26;) {
-                float temp_1 = data.getFloat(String.valueOf(i + 1));
-                float flow_pre = Float.parseFloat(flow_rule.get("pre").toString());
-                int temp_1_int = (int) (temp_1 / flow_pre + (temp_1 % flow_pre != 0 ? 1 : 0));
-                float temp_2 = data.getFloat(String.valueOf(i + 2));
-                int temp_2_int = (int) (temp_2 / flow_pre + (temp_2 % flow_pre != 0 ? 1 : 0));
-                int temp = (temp_1_int + temp_2_int) / 2 + ((temp_1_int + temp_2_int) % 2 != 0 ? 1 : 0);
-                flow.add(temp);
-                i += 2;
-            }
             //获取上下班时间
             List<Integer> up_down;
             JSONArray up_down_json;
@@ -154,6 +144,16 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             up_down = JSONArray.parseArray(up_down_json.toString(),Integer.class);
             //持续时长
             int all_time = up_down.get(1) - up_down.get(0) + open_time + close_time;
+            for (int i = 0; i < (up_down.get(1) - up_down.get(0)) * 2;) {
+                float temp_1 = data.getFloat(String.valueOf(i + 1));
+                float flow_pre = Float.parseFloat(flow_rule.get("pre").toString());
+                int temp_1_int = (int) (temp_1 / flow_pre + (temp_1 % flow_pre != 0 ? 1 : 0));
+                float temp_2 = data.getFloat(String.valueOf(i + 2));
+                int temp_2_int = (int) (temp_2 / flow_pre + (temp_2 % flow_pre != 0 ? 1 : 0));
+                int temp = (temp_1_int + temp_2_int) / 2 + ((temp_1_int + temp_2_int) % 2 != 0 ? 1 : 0);
+                flow.add(temp);
+                i += 2;
+            }
             //逐小时排班
             JSONArray short_long = (JSONArray) working_hours_rule.get("c");
             int short_time = (int) short_long.get(0);
@@ -238,8 +238,8 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                             }
                             for (int j = 0; j < pag_pag; j++) {
                                 scheduling.add(1);
+                                scheduling_time.add(up_down.get(0) + i - 1);
                                 scheduling_time.add(up_down.get(0) + i);
-                                scheduling_time.add(up_down.get(0) + i + 1);
                                 current.add(scheduling.size() - 1);
                             }
                         }
