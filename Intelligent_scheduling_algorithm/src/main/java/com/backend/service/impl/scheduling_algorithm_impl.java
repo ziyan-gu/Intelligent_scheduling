@@ -263,7 +263,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             else {
                 schedulingDao.insert(scheduling_up);
             }
-            System.out.println(generation_scheduling(up_data));
+            System.out.println(generation_scheduling(scheduling_up));
         }
         LocalTime time_2 = LocalTime.now();
         Duration duration = Duration.between(time_2,time_1);
@@ -325,8 +325,22 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
 
     // 生成排班表
     @Override
-    public Object generation_scheduling(JSONObject data) {
-
+    public Object generation_scheduling(Scheduling scheduling) {
+        //解析员工
+        List<Integer> position = new ArrayList<>();
+        List<JSONObject> preference = new ArrayList<>();
+        for (Employee employee : employees) {
+            position.add(employee.getPosition());
+            preference.add(JSON.parseObject(employee.getPreferenceValue()));
+        }
+        String data_str = scheduling.getData();
+        JSONObject data = JSON.parseObject(data_str);
+        int total = (int) data.get("total");
+        for (int i = 1; i <= total; i++) {
+            JSONArray current = new JSONArray();
+            current = (JSONArray) data.get(String.valueOf(i));
+            
+        }
         return data;
     }
 }
