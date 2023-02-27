@@ -89,6 +89,13 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         wrapper_employee.eq("isDelete",0);
         return employeeDao.selectList(wrapper_employee);
     }
+
+    private List<Scheduling> getScheduling(String id) {
+        QueryWrapper<Scheduling> wrapper = new QueryWrapper<>();
+        wrapper.eq("id",id);
+        return schedulingDao.selectList(wrapper);
+
+    }
     // 生成班次
     @Override
     public Object generation_shift(String id) {
@@ -250,26 +257,20 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             QueryWrapper<Scheduling> wrapper_scheduling = new QueryWrapper<>();
             wrapper_scheduling.eq("id",id);
             wrapper_scheduling.eq("date",date);
-            System.out.println(date);
-            System.out.println(schedulingDao.exists(wrapper_scheduling));
             if (schedulingDao.exists(wrapper_scheduling)) {
                 schedulingDao.update(scheduling_up,wrapper_scheduling);
             }
             else {
                 schedulingDao.insert(scheduling_up);
             }
-
-
-
-            System.out.println(flow);
-            System.out.println(scheduling);
-            System.out.println(scheduling_time);
-            System.out.println(current);
+            System.out.println(generation_scheduling(up_data));
         }
         LocalTime time_2 = LocalTime.now();
         Duration duration = Duration.between(time_2,time_1);
         System.out.println(duration);
-        return passenger_flows.get(0);
+        List<Scheduling> scheduling;
+        scheduling = getScheduling(id);
+        return scheduling;
     }
 
     //当前剩余增加，新增
@@ -324,9 +325,8 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
 
     // 生成排班表
     @Override
-    public Object generation_scheduling() {
-        List<Passenger_Flow> passenger_flows = passenger_flowDao.selectList(null);
-        System.out.println(passenger_flows.get(0).getId());
-        return passenger_flows.get(0).getId();
+    public Object generation_scheduling(JSONObject data) {
+
+        return data;
     }
 }

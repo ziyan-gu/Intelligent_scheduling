@@ -1,5 +1,6 @@
 package com.backend.service;
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.transaction.annotation.Transactional;
 
 // 排班算法接口
@@ -8,5 +9,5 @@ public interface scheduling_algorithm {
     // 生成班次
     Object generation_shift(String id);
     // 生成排班表
-    Object generation_scheduling();
+    Object generation_scheduling(JSONObject data);
 }
