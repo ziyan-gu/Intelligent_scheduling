@@ -1,0 +1,23 @@
+server:
+  port: 80
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.113.223.214:8848
+        username: nacos
+        password: nacos
+        namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
+        group: Intelligent_scheduling
+
+    gateway:
+      discovery:
+        locator:
+          enabled: true #开启动态路由
+          lower-case-service-id: true
+      route:
+        filters:
+           -StripPrefix=1
+

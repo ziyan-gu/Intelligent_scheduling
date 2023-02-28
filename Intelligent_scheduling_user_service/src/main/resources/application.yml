@@ -2,14 +2,22 @@ server:
   port: 8430
 spring:
   application:
-    name: login
+    name: userService
   cloud:
     nacos:
       discovery:
         server-addr: 47.113.223.214:8848
         username: nacos
         password: nacos
-#        service: test
+        service: userService
+        namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
+        group: Intelligent_scheduling
+#      config:
+#        server-addr: 47.113.223.214:8848
+#        file-extension: yml
+#        namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
+#        group: Intelligent_scheduling
+#        prefix: userService
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver

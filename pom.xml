@@ -10,8 +10,9 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>Intelligent_scheduling_algorithm</module>
-        <module>Intelligent_scheduling_login</module>
+        <module>Intelligent_scheduling_user_service</module>
         <module>Intelligent_scheduling_employee_service</module>
+        <module>Intelligent_scheduling_gateway</module>
     </modules>
 
     <properties>

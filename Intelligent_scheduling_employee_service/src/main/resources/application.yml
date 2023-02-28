@@ -9,7 +9,9 @@ spring:
         server-addr: 47.113.223.214:8848
         username: nacos
         password: nacos
-  #        service: test
+        service: employeeService
+        namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
+        group: Intelligent_scheduling
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
