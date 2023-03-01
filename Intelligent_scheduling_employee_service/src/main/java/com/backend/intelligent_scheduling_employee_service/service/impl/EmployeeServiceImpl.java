@@ -17,6 +17,8 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author 86136
@@ -32,8 +34,43 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     public String USER_LOGIN_STATE = "userLoginState";
     @Resource
     public EmployeeMapper employeeMapper;
+//    @Override
+//    public String addNewEmployee(String id, String name, String email, Integer position, String store) {
+//
+//        //邮箱匹配
+//        if(!UserInfoCheckUtil.isValidEmail(email)){
+//            return null;
+//        }
+//
+//        //账户不能重复
+//        QueryWrapper<Employee> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("id", id);
+//        long count = employeeMapper.selectCount(queryWrapper);
+//        if(count>0){
+//            return null;
+//        }
+//
+//        //员工起始密码均为123456 进行加密
+//        Employee employee = new Employee();
+//        String password = "123456";
+//        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+//
+//        employee.setId(id);
+//        employee.setName(name);
+//        employee.setEmail(email);
+//        employee.setPassword(encryptPassword);
+//        employee.setPosition(position);
+//        employee.setStore(store);
+//
+//        boolean saveResult = this.save(employee);
+//        if(!saveResult){
+//            return null;
+//        }
+//        return employee.getId();
+//    }
+
     @Override
-    public String addEmployee(String id, String name, String email, Integer position, String store) {
+    public String addNewEmployee(String name, String email, Integer position) {
 
         //邮箱匹配
         if(!UserInfoCheckUtil.isValidEmail(email)){
@@ -42,7 +79,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
         //账户不能重复
         QueryWrapper<Employee> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("id", id);
+        queryWrapper.eq("email", email);
         long count = employeeMapper.selectCount(queryWrapper);
         if(count>0){
             return null;
@@ -53,12 +90,12 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         String password = "123456";
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
-        employee.setId(id);
         employee.setName(name);
         employee.setEmail(email);
         employee.setPassword(encryptPassword);
         employee.setPosition(position);
-        employee.setStore(store);
+        employee.setId("ok");
+        employee.setStore("null");
 
         boolean saveResult = this.save(employee);
         if(!saveResult){
@@ -130,6 +167,17 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
         return safetyEmployee;
     }
+
+    @Override
+    public List<String> getStoreByEmployeeId(String id) {
+//        QueryWrapper<Employee> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("employee.id", id);
+//        queryWrapper.select("store.name");
+//        queryWrapper.join("store", "employee.store = store.id");
+//        Map<String, Object> map = employeeMapper.selectMaps(queryWrapper).stream().findFirst().orElse(null);
+//        String storeName = map == null ? null : map.get("name").toString();
+//
+//    }
 }
 
 

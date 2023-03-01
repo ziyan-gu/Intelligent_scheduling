@@ -6,8 +6,8 @@ import com.backend.intelligent_scheduling_employee_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_employee_service.common.ResultUtils;
 import com.backend.intelligent_scheduling_employee_service.exception.BusinessException;
 import com.backend.intelligent_scheduling_employee_service.model.Employee;
-import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeAddRequest;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeLoginRequest;
+import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeNewAddRequest;
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,22 +36,53 @@ public class EmployeeController {
         return ResultUtils.success(result);
     }
 
-    @PostMapping
-    public BaseResponse<String> addEmployee(@RequestBody EmployeeAddRequest employeeAddRequest){
-        if(employeeAddRequest == null){
+//    @PostMapping
+//    public BaseResponse<String> addEmployee(@RequestBody EmployeeAddRequest employeeAddRequest){
+//        if(employeeAddRequest == null){
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+//        }
+//        String id = employeeAddRequest.getId();
+//        String name = employeeAddRequest.getName();
+//        String email = employeeAddRequest.getEmail();
+//        Integer position = employeeAddRequest.getPosition();
+//        String store = employeeAddRequest.getStore();
+//
+//        if(StringUtils.isAnyBlank(id,name,email,position.toString(),store)){
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
+//        }
+//
+//        String result = employeeService.addEmployee(id, name, email, position, store);
+//
+//        return ResultUtils.success(result);
+
+        @GetMapping("/{id}")
+        public BaseResponse<String> getStoreById(@PathVariable String id){
+            if(id == null || StringUtils.isAnyBlank(id)){
+                throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空或存在非法字符");
+            }
+
+            //是否管理员
+            if(id.length() == 1){
+                return ;
+            }
+
+            return ResultUtils.success(result);
+        }
+
+        @PostMapping
+        public BaseResponse<String> addEmployee(@RequestBody EmployeeNewAddRequest employeeNewAddRequest){
+        if(employeeNewAddRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
-        String id = employeeAddRequest.getId();
-        String name = employeeAddRequest.getName();
-        String email = employeeAddRequest.getEmail();
-        Integer position = employeeAddRequest.getPosition();
-        String store = employeeAddRequest.getStore();
+        String name = employeeNewAddRequest.getName();
+        String email = employeeNewAddRequest.getEmail();
+        Integer position = employeeNewAddRequest.getPosition();
 
-        if(StringUtils.isAnyBlank(id,name,email,position.toString(),store)){
+        if(StringUtils.isAnyBlank(name,email,position.toString())){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
         }
 
-        String result = employeeService.addEmployee(id, name, email, position, store);
+        String result = employeeService.addNewEmployee(name, email, position);
 
         return ResultUtils.success(result);
 

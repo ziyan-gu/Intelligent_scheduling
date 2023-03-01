@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author 86136
@@ -15,14 +16,14 @@ public interface EmployeeService extends IService<Employee> {
 
     /**
      * 添加员工
-     * @param id id
      * @param name 姓名
      * @param email 邮箱
      * @param position 位置
-     * @param store 门店
      * @return 返回id
      */
-    String addEmployee(String id, String name, String email, Integer position, String store);
+//    String addEmployee(String id, String name, String email, Integer position, String store);
+    String addNewEmployee(String name, String email, Integer position);
+
 
     /**
      *
@@ -42,5 +43,18 @@ public interface EmployeeService extends IService<Employee> {
      */
     Employee employeeLogin(String email,String password, HttpServletRequest request);
 
+    /**
+     * 获取安全用户
+     * @param originEmployee  原始
+     * @return 安全
+     */
     Employee getSafeEmployee(Employee originEmployee);
+
+    /**
+     * 查询店铺名
+     * @param id  用户id
+     * @return 返回店铺名
+     */
+    List<String> getStoreByEmployeeId(String id);
+
 }
