@@ -177,6 +177,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             List<Integer> scheduling = new ArrayList<>();
             List<Integer> scheduling_time = new ArrayList<>();
             List<Integer> current = new ArrayList<>();
+            List<Integer> onDuty = new ArrayList<>();
             for (int i = 0; i < all_time; i++) {
                 if (i < open_time && i == 0) {
                     for (int j = 0; j < open_num; j++) {
@@ -238,6 +239,18 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                         }
 
                     }
+                    if (short_num.size() == 0 && flow.get(i - open_time) == 0) {
+                        int temp;
+                        if (current.size() >= 1) {
+                            increase_inTurn(scheduling, scheduling_time, current, short_num, 1);
+                            temp = current.get(0);
+                        }
+                        else {
+                            residual_addition(up_down, scheduling, scheduling_time, current, i, short_num, 1);
+                            temp = scheduling.size();
+                        }
+                        onDuty.add(temp);
+                    }
                 }
             }
             JSONObject up_data = new JSONObject();
@@ -245,9 +258,17 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             up_data.put("total", total);
             for (int i = 1; i <= total; i++) {
                 JSONArray data_people = new JSONArray();
-                data_people.add(scheduling_time.get((i - 1) * 2));
-                data_people.add(scheduling_time.get((i - 1) * 2 + 1));
+                int temp_1 = scheduling_time.get((i - 1) * 2);
+                int temp_2 = scheduling_time.get((i - 1) * 2 + 1);
+                data_people.add(temp_1);
+                data_people.add(temp_2);
                 data_people.add("0");
+                if (onDuty.contains(i)) {
+                    data_people.add(1);
+                }
+                else {
+                    data_people.add(0);
+                }
                 up_data.put(String.valueOf(i),data_people);
             }
             Scheduling scheduling_up = new Scheduling();
@@ -337,17 +358,32 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         JSONObject data = JSON.parseObject(data_str);
         int total = (int) data.get("total");
         JSONArray limit_position = new JSONArray();
-        List<JSONObject> employee_sort = new ArrayList<>();
+        List<Object> employee_sort = new ArrayList<>();
         for (int i = 1; i <= total; i++) {
             new JSONArray();
             JSONArray current = (JSONArray) data.get(String.valueOf(i));
             int time_1 = (int) current.get(0);
             int time_2 = (int) current.get(1);
+            List<Employee> current_employee = new ArrayList<>();
             if (up_down.get(0) == time_1) {
+                limit_position = (JSONArray) open_rule.get("type");
 
+                for (int j = 0; j < employees.size(); j++) {
+                    if (limit_position.contains(position.get(j))) {
+                        current_employee.add(employees.get(j));
+                    }
+                }
+                employee_sort.add(current_employee);
             }
             else if (up_down.get(1) == time_2) {
+                limit_position = (JSONArray) close_rule.get("type");
 
+                for (int j = 0; j < employees.size(); j++) {
+                    if (limit_position.contains(position.get(j))) {
+                        current_employee.add(employees.get(j));
+                    }
+                }
+                employee_sort.add(current_employee);
             }
         }
         return data;
