@@ -25,6 +25,7 @@ public class Store implements Serializable {
      */
     private String name;
 
+    private String company;
     /**
      * 
      */

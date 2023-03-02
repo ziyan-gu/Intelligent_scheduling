@@ -26,11 +26,11 @@ public class EmployeeController {
 
     @DeleteMapping("/{id}")
     public BaseResponse<Boolean> deleteEmployee(@PathVariable String id) {
-        if(id == null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        if (id == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        if (StringUtils.isAnyBlank(id)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
+        if (StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "存在空格");
         }
         boolean result = employeeService.remove(new QueryWrapper<Employee>().eq("id", id));
         return ResultUtils.success(result);
@@ -55,31 +55,31 @@ public class EmployeeController {
 //
 //        return ResultUtils.success(result);
 
-        @GetMapping("/{id}")
-        public BaseResponse<String> getStoreById(@PathVariable String id){
-            if(id == null || StringUtils.isAnyBlank(id)){
-                throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空或存在非法字符");
-            }
-
-            //是否管理员
-            if(id.length() == 1){
-                return ;
-            }
-
-            return ResultUtils.success(result);
+    @GetMapping("storename/{id}")
+    public BaseResponse<String> getStoreById(@PathVariable String id) {
+        if (id == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
         }
 
-        @PostMapping
-        public BaseResponse<String> addEmployee(@RequestBody EmployeeNewAddRequest employeeNewAddRequest){
-        if(employeeNewAddRequest == null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        String storeName = employeeService.getStoreByEmployeeId(id);
+        if (storeName == null) {
+                throw new BusinessException(ErrorCode.NULL_ERROR,"未查询到相关信息");
+        }
+
+        return ResultUtils.success(storeName);
+    }
+
+    @PostMapping
+    public BaseResponse<String> addEmployee(@RequestBody EmployeeNewAddRequest employeeNewAddRequest) {
+        if (employeeNewAddRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         String name = employeeNewAddRequest.getName();
         String email = employeeNewAddRequest.getEmail();
         Integer position = employeeNewAddRequest.getPosition();
 
-        if(StringUtils.isAnyBlank(name,email,position.toString())){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
+        if (StringUtils.isAnyBlank(name, email, position.toString())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "存在空格");
         }
 
         String result = employeeService.addNewEmployee(name, email, position);
@@ -100,16 +100,16 @@ public class EmployeeController {
 //    }
 
     @GetMapping
-    public BaseResponse<List<Employee>> getAllEmployees(){
+    public BaseResponse<List<Employee>> getAllEmployees() {
         List<Employee> employees = employeeService.list();
         employees.forEach(employee -> employee.setPassword(null));
         return ResultUtils.success(employees);
     }
 
     @GetMapping("/{id}")
-    public BaseResponse<Employee> getEmployee(@PathVariable String id){
-        if(id == null || StringUtils.isAnyBlank(id)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空或存在非法字符");
+    public BaseResponse<Employee> getEmployee(@PathVariable String id) {
+        if (id == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
         }
         Employee employee = employeeService.getOne(new QueryWrapper<Employee>().eq("id", id));
         employee.setPassword(null);
@@ -118,11 +118,11 @@ public class EmployeeController {
 
     @PutMapping("/prefer/{id}")
     public BaseResponse<Boolean> modifyEmployeePreference(@PathVariable String id, @RequestBody Employee employee) throws JsonProcessingException {
-        if(id == null || StringUtils.isAnyBlank(id)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空或存在非法字符");
+        if (id == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
         }
 
-        boolean result = employeeService.modifyEmployeePreferenceService(id,employee);
+        boolean result = employeeService.modifyEmployeePreferenceService(id, employee);
 
         return ResultUtils.success(result);
     }
@@ -131,13 +131,13 @@ public class EmployeeController {
     public BaseResponse<Employee> userLogin(@RequestBody EmployeeLoginRequest employeeLoginRequest,
                                             HttpServletRequest request) {
         if (employeeLoginRequest == null) {
-            throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
+            throw new BusinessException(ErrorCode.NULL_ERROR, "请求数据为空");
         }
         String email = employeeLoginRequest.getEmail();
         String password = employeeLoginRequest.getPassword();
 
-        if (StringUtils.isAnyBlank(email,password)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"输入存在空格");
+        if (StringUtils.isAnyBlank(email, password)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入存在空格");
         }
         Employee employee = employeeService.employeeLogin(email, password, request);
         return ResultUtils.success(employee);

@@ -7,9 +7,10 @@ import org.apache.ibatis.annotations.Mapper;
 /**
 * @author 86136
 * @description 针对表【store】的数据库操作Mapper
-* @createDate 2023-02-28 23:22:31
-* @Entity com.backend.intelligent_scheduling_login.model.Store
+* @createDate 2023-03-02 23:31:53
+* @Entity generator.model.Store
 */
+
 @Mapper
 public interface StoreMapper extends BaseMapper<Store> {
 

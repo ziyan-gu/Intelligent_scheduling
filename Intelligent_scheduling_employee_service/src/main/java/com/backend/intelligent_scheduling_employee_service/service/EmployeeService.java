@@ -55,6 +55,6 @@ public interface EmployeeService extends IService<Employee> {
      * @param id  用户id
      * @return 返回店铺名
      */
-    List<String> getStoreByEmployeeId(String id);
+    String getStoreByEmployeeId(String id);
 
 }

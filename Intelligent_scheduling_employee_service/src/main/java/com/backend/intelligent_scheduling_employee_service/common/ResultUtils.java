@@ -12,7 +12,7 @@ public class ResultUtils {
      * @param <T> 数据类型
      */
     public static <T> BaseResponse<T> success(T data){
-        return new BaseResponse<>(0, data, "ok");
+        return new BaseResponse<>(2000, data, "ok");
     }
 
     /**

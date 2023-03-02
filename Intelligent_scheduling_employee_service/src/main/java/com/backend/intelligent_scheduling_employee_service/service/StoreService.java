@@ -12,10 +12,5 @@ import java.util.List;
 */
 public interface StoreService extends IService<Store> {
 
-    /**
-     * 查询店铺名
-     * @param id  用户id
-     * @return 返回店铺名
-     */
-    List<String> getStoreByUserId(String id);
+
 }

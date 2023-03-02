@@ -4,11 +4,11 @@ import com.alibaba.nacos.common.utils.StringUtils;
 import com.backend.intelligent_scheduling_login.common.ErrorCode;
 import com.backend.intelligent_scheduling_login.common.UserInfoCheckUtil;
 import com.backend.intelligent_scheduling_login.exception.BusinessException;
+import com.backend.intelligent_scheduling_login.mapper.UserMapper;
+import com.backend.intelligent_scheduling_login.model.User;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.backend.intelligent_scheduling_login.model.User;
 import com.backend.intelligent_scheduling_login.service.UserService;
-import com.backend.intelligent_scheduling_login.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 

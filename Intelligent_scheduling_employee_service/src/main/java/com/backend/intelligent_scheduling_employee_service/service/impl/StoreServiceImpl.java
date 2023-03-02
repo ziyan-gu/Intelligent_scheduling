@@ -17,10 +17,6 @@ import java.util.List;
 public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
     implements StoreService{
 
-    @Override
-    public List<String> getStoreByUserId(String id) {
-        return null;
-    }
 }
 
 

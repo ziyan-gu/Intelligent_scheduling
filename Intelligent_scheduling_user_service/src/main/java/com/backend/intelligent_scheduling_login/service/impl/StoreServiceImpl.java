@@ -1,11 +1,10 @@
 package com.backend.intelligent_scheduling_login.service.impl;
 
+import com.backend.intelligent_scheduling_login.mapper.StoreMapper;
+import com.backend.intelligent_scheduling_login.model.Store;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.backend.intelligent_scheduling_login.model.Store;
 import com.backend.intelligent_scheduling_login.service.StoreService;
-import com.backend.intelligent_scheduling_login.mapper.StoreMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

@@ -4,6 +4,8 @@ import com.alibaba.nacos.common.utils.StringUtils;
 import com.backend.intelligent_scheduling_employee_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_employee_service.common.UserInfoCheckUtil;
 import com.backend.intelligent_scheduling_employee_service.exception.BusinessException;
+import com.backend.intelligent_scheduling_employee_service.mapper.StoreMapper;
+import com.backend.intelligent_scheduling_employee_service.model.Store;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -34,6 +36,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     public String USER_LOGIN_STATE = "userLoginState";
     @Resource
     public EmployeeMapper employeeMapper;
+
+    @Resource
+    public StoreMapper storeMapper;
 //    @Override
 //    public String addNewEmployee(String id, String name, String email, Integer position, String store) {
 //
@@ -169,15 +174,20 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     }
 
     @Override
-    public List<String> getStoreByEmployeeId(String id) {
-//        QueryWrapper<Employee> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("employee.id", id);
-//        queryWrapper.select("store.name");
-//        queryWrapper.join("store", "employee.store = store.id");
-//        Map<String, Object> map = employeeMapper.selectMaps(queryWrapper).stream().findFirst().orElse(null);
-//        String storeName = map == null ? null : map.get("name").toString();
-//
-//    }
+    public String getStoreByEmployeeId(String id) {
+        QueryWrapper<Employee> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("employee.id", id);
+        Employee employee = employeeMapper.selectOne(queryWrapper);
+        String storeName = employee.getStore();
+
+        QueryWrapper<Store> queryWrapperOfStore = new QueryWrapper<>();
+        queryWrapperOfStore.eq("store.id", storeName);
+        Store store = storeMapper.selectOne(queryWrapperOfStore);
+        if(store == null){
+            return null;
+        }
+        return store.getName();
+    }
 }
 
 
