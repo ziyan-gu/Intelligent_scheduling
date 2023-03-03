@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class Store {
     private String id;
+    private String company;
     private String name;
     private String address;
     private float size;

@@ -100,11 +100,11 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     @Override
     public Object generation_shift(String id) {
         LocalTime time_1 = LocalTime.now();
-        String[] str_admin = id.split("_",2);
-        //获取固定规则
-        fixed_rules = getFixed_rule(str_admin[0]);
         //获取门店信息
         Store store = getStore(id);
+        String admin = store.getCompany();
+        //获取固定规则
+        fixed_rules = getFixed_rule(admin);
         //获取客流量
         List<Passenger_Flow> passenger_flows = getPassenger_Flow(id);
         //获取自定义规则
