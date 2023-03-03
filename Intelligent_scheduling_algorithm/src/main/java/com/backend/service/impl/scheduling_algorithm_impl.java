@@ -15,18 +15,15 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // 排班算法具体实现
 @Service
 public class scheduling_algorithm_impl implements scheduling_algorithm {
 
-    //固定规则
-    private List<Fixed_Rules> fixed_rules = new ArrayList<>();
     //员工信息
     private List<Employee> employees = new ArrayList<>();
-    //自定义规则值
-    private List<Scheduling_Rules> scheduling_rules = new ArrayList<>();
     //解析自定义规则值
     private JSONObject open_rule = new JSONObject();
     private JSONObject close_rule = new JSONObject();
@@ -104,11 +101,13 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         Store store = getStore(id);
         String admin = store.getCompany();
         //获取固定规则
-        fixed_rules = getFixed_rule(admin);
+        //固定规则
+        List<Fixed_Rules> fixed_rules = getFixed_rule(admin);
         //获取客流量
         List<Passenger_Flow> passenger_flows = getPassenger_Flow(id);
         //获取自定义规则
-        scheduling_rules = getScheduling_Rules(id);
+        //自定义规则值
+        List<Scheduling_Rules> scheduling_rules = getScheduling_Rules(id);
         //获取员工信息
         employees = getEmployee(id);
 
@@ -347,23 +346,38 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     // 生成排班表
     @Override
     public Object generation_scheduling(Scheduling scheduling, List<Integer> up_down) {
+        Date date = Date.valueOf(scheduling.getDate());
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
+        String current_week = sdf.format(date);
         //解析员工
+        //员工的职位
         List<Integer> position = new ArrayList<>();
+        //员工的偏好
         List<JSONObject> preference = new ArrayList<>();
         for (Employee employee : employees) {
             position.add(employee.getPosition());
             preference.add(JSON.parseObject(employee.getPreferenceValue()));
         }
+        //排班表数据信息
         String data_str = scheduling.getData();
         JSONObject data = JSON.parseObject(data_str);
         int total = (int) data.get("total");
+        //限定职位
         JSONArray limit_position = new JSONArray();
+        //每个班次拥有的员工
         List<Object> employee_sort = new ArrayList<>();
+        //星期表
+        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日"));
+        int week_int = week_list.indexOf(current_week) + 1;
         for (int i = 1; i <= total; i++) {
             new JSONArray();
             JSONArray current = (JSONArray) data.get(String.valueOf(i));
+            //当前班次时间
             int time_1 = (int) current.get(0);
             int time_2 = (int) current.get(1);
+            //判断是否值班班次
+            int is_onDuty = (int) current.get(3);
+            //当前班次所拥有的员工
             List<Employee> current_employee = new ArrayList<>();
             if (up_down.get(0) == time_1) {
                 limit_position = (JSONArray) open_rule.get("type");
@@ -385,7 +399,35 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 }
                 employee_sort.add(current_employee);
             }
+            else if (is_onDuty == 1) {
+                limit_position = (JSONArray) on_duty_rule.get("type");
+
+                for (int j = 0; j < employees.size(); j++) {
+                    if (limit_position.contains(position.get(j))) {
+                        current_employee.add(employees.get(j));
+                    }
+                }
+                employee_sort.add(current_employee);
+            }
+            else {
+                limit_position = (JSONArray) cashier_rule.get("type");
+                for (int j = 0; j < employees.size(); j++) {
+                    if (limit_position.contains(position.get(j))) {
+                        current_employee.add(employees.get(j));
+                    }
+                    JSONArray workday = preference.get(j).getJSONObject("workday").getJSONArray("day");
+                    JSONArray working_hours_time = preference.get(j).getJSONObject("working_hours").getJSONArray("time");
+                    //是否属于偏好时间段
+                    int temp = Math.min((time_2 - (int) working_hours_time.get(0)), (time_1 - (int) working_hours_time.get(1)));
+                    int temp_2 = Math.min((time_2 - (int) working_hours_time.get(2)), (time_1 - (int) working_hours_time.get(3)));
+                    if (workday.contains(week_int) && (temp >= (time_2 - time_1) / 2 || temp_2 >= (time_2 - time_1) / 2)) {
+                        current_employee.add(employees.get(j));
+                    }
+                }
+                employee_sort.add(current_employee);
+            }
         }
+        System.out.println(employee_sort);
         return data;
     }
 }
