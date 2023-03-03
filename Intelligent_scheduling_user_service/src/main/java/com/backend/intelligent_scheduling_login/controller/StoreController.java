@@ -7,6 +7,7 @@ import com.backend.intelligent_scheduling_login.common.ResultUtils;
 import com.backend.intelligent_scheduling_login.exception.BusinessException;
 import com.backend.intelligent_scheduling_login.model.Store;
 import com.backend.intelligent_scheduling_login.service.StoreService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ public class StoreController {
     @Autowired
     private StoreService storeService;
 
+    @ApiOperation("根据管理员id查询店铺名")
     @GetMapping("/id/{id}")
     public BaseResponse<List<Store>> getStoresById(@PathVariable String id){
         if(id == null){

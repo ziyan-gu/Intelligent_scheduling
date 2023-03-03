@@ -11,6 +11,7 @@ import com.backend.intelligent_scheduling_employee_service.model.request.Employe
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @DeleteMapping("/{id}")
+    @ApiOperation("删除员工")
     public BaseResponse<Boolean> deleteEmployee(@PathVariable String id) {
         if (id == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -56,6 +58,7 @@ public class EmployeeController {
 //        return ResultUtils.success(result);
 
     @GetMapping("storename/{id}")
+    @ApiOperation("根据员工id获取员工所在店铺名")
     public BaseResponse<String> getStoreById(@PathVariable String id) {
         if (id == null || StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
@@ -70,6 +73,7 @@ public class EmployeeController {
     }
 
     @PostMapping
+    @ApiOperation("增加员工")
     public BaseResponse<String> addEmployee(@RequestBody EmployeeNewAddRequest employeeNewAddRequest) {
         if (employeeNewAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -100,6 +104,7 @@ public class EmployeeController {
 //    }
 
     @GetMapping
+    @ApiOperation("获取所有员工信息")
     public BaseResponse<List<Employee>> getAllEmployees() {
         List<Employee> employees = employeeService.list();
         employees.forEach(employee -> employee.setPassword(null));
@@ -107,6 +112,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
+    @ApiOperation("获取员工信息")
     public BaseResponse<Employee> getEmployee(@PathVariable String id) {
         if (id == null || StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
@@ -117,6 +123,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/prefer/{id}")
+    @ApiOperation("更改员工偏好")
     public BaseResponse<Boolean> modifyEmployeePreference(@PathVariable String id, @RequestBody Employee employee) throws JsonProcessingException {
         if (id == null || StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
@@ -128,6 +135,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/login")
+    @ApiOperation("员工登录")
     public BaseResponse<Employee> userLogin(@RequestBody EmployeeLoginRequest employeeLoginRequest,
                                             HttpServletRequest request) {
         if (employeeLoginRequest == null) {

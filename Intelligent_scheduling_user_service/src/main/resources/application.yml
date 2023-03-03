@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: userService
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher  #boot2.6版本以上
   cloud:
     nacos:
       discovery:

@@ -9,6 +9,7 @@ import com.backend.intelligent_scheduling_login.model.User;
 import com.backend.intelligent_scheduling_login.model.request.UserLoginRequest;
 import com.backend.intelligent_scheduling_login.model.request.UserRegisterRequest;
 import com.backend.intelligent_scheduling_login.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +25,7 @@ public class UserController {
     @Autowired
     public UserService userService;
 
+    @ApiOperation("用户注册")
     @PostMapping("/register")
     public BaseResponse<String> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
@@ -42,6 +44,7 @@ public class UserController {
         return ResultUtils.success(result);
     }
 
+    @ApiOperation("用户登录")
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
