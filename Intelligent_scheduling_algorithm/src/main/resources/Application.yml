@@ -1,10 +1,24 @@
 spring:
+  application:
+    name: orderService
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://47.108.211.77:3306/Intelligent_scheduling?serverTimezone=UTC
     username: admin
     password: mysqladmin
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.113.223.214:8848
+        username: nacos
+        password: nacos
+        service: orderService
+        namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
+        group: Intelligent_scheduling
+
+
 
 server:
   port: 80
