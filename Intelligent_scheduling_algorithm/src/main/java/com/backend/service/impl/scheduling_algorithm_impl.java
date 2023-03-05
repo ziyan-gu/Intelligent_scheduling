@@ -363,9 +363,10 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         JSONObject data = JSON.parseObject(data_str);
         int total = (int) data.get("total");
         //限定职位
-        JSONArray limit_position = new JSONArray();
+        new JSONArray();
+        JSONArray limit_position;
         //每个班次拥有的员工
-        List<Object> employee_sort = new ArrayList<>();
+        List<List<Employee_Sort>> employee_sort = new ArrayList<>();
         //星期表
         List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日"));
         int week_int = week_list.indexOf(current_week) + 1;
@@ -375,45 +376,41 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             //当前班次时间
             int time_1 = (int) current.get(0);
             int time_2 = (int) current.get(1);
+            JSONArray lunch = rest_time_rule.getJSONArray("lunch");
+            JSONArray dinner = rest_time_rule.getJSONArray("dinner");
+            if (time_1 < (int)lunch.get(0) && time_2 > (int)lunch.get(1)) {
+                JSONArray temp = data.getJSONArray(String.valueOf(i));
+                int temp_int = (int) temp.get(1) + (int)lunch.get(2);
+                temp.set(1,temp_int);
+                data.put(String.valueOf(i),temp);
+            }
+            else if (time_1 < (int)dinner.get(0) && time_2 > (int)dinner.get(1)) {
+                JSONArray temp = data.getJSONArray(String.valueOf(i));
+                int temp_int = (int) temp.get(1) + (int)dinner.get(2);
+                temp.set(1,temp_int);
+                data.put(String.valueOf(i),temp);
+            }
             //判断是否值班班次
             int is_onDuty = (int) current.get(3);
             //当前班次所拥有的员工
-            List<Employee> current_employee = new ArrayList<>();
+            List<Employee_Sort> current_employee = new ArrayList<>();
+            Employee_Sort employee_sort_current = new Employee_Sort();
             if (up_down.get(0) == time_1) {
-                limit_position = (JSONArray) open_rule.get("type");
-
-                for (int j = 0; j < employees.size(); j++) {
-                    if (limit_position.contains(position.get(j))) {
-                        current_employee.add(employees.get(j));
-                    }
-                }
-                employee_sort.add(current_employee);
+                rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, open_rule);
             }
             else if (up_down.get(1) == time_2) {
-                limit_position = (JSONArray) close_rule.get("type");
-
-                for (int j = 0; j < employees.size(); j++) {
-                    if (limit_position.contains(position.get(j))) {
-                        current_employee.add(employees.get(j));
-                    }
-                }
-                employee_sort.add(current_employee);
+                rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, close_rule);
             }
             else if (is_onDuty == 1) {
-                limit_position = (JSONArray) on_duty_rule.get("type");
-
-                for (int j = 0; j < employees.size(); j++) {
-                    if (limit_position.contains(position.get(j))) {
-                        current_employee.add(employees.get(j));
-                    }
-                }
-                employee_sort.add(current_employee);
+                rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, on_duty_rule);
             }
             else {
                 limit_position = (JSONArray) cashier_rule.get("type");
                 for (int j = 0; j < employees.size(); j++) {
                     if (limit_position.contains(position.get(j))) {
-                        current_employee.add(employees.get(j));
+                        employee_sort_current.setEmployee(employees.get(j));
+                        employee_sort_current.setPriority(1);
+                        current_employee.add(employee_sort_current);
                     }
                     JSONArray workday = preference.get(j).getJSONObject("workday").getJSONArray("day");
                     JSONArray working_hours_time = preference.get(j).getJSONObject("working_hours").getJSONArray("time");
@@ -421,13 +418,32 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     int temp = Math.min((time_2 - (int) working_hours_time.get(0)), (time_1 - (int) working_hours_time.get(1)));
                     int temp_2 = Math.min((time_2 - (int) working_hours_time.get(2)), (time_1 - (int) working_hours_time.get(3)));
                     if (workday.contains(week_int) && (temp >= (time_2 - time_1) / 2 || temp_2 >= (time_2 - time_1) / 2)) {
-                        current_employee.add(employees.get(j));
+                        employee_sort_current.setEmployee(employees.get(j));
+                        employee_sort_current.setPriority(5);
+                        current_employee.add(employee_sort_current);
                     }
                 }
                 employee_sort.add(current_employee);
             }
+
         }
+
         System.out.println(employee_sort);
         return data;
+    }
+
+    //开店关店规则-选取员工
+    private void rules_employeeSort(List<Integer> position, List<List<Employee_Sort>> employee_sort, List<Employee_Sort> current_employee, Employee_Sort employee_sort_current, JSONObject rule) {
+        JSONArray limit_position;
+        limit_position = (JSONArray) rule.get("type");
+
+        for (int j = 0; j < employees.size(); j++) {
+            if (limit_position.contains(position.get(j))) {
+                employee_sort_current.setEmployee(employees.get(j));
+                employee_sort_current.setPriority(1);
+                current_employee.add(employee_sort_current);
+            }
+        }
+        employee_sort.add(current_employee);
     }
 }
