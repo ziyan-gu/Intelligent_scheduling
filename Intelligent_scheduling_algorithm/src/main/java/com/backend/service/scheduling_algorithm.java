@@ -12,5 +12,5 @@ public interface scheduling_algorithm {
     // 生成班次
     Object generation_shift(String id);
     // 生成排班表
-    Object generation_scheduling(Scheduling scheduling, List<Integer> up_down);
+    Object generation_scheduling(List<Scheduling> schedulings, List<List<Integer>> up_downs);
 }

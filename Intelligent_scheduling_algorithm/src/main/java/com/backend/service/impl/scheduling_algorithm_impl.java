@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 // 排班算法具体实现
@@ -71,6 +72,18 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     private List<Passenger_Flow> getPassenger_Flow(String id) {
         QueryWrapper<Passenger_Flow> wrapper_flow = new QueryWrapper<>();
         wrapper_flow.eq("id",id);
+        Date current_date = new Date(System.currentTimeMillis());
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
+        String week = sdf.format(current_date);
+        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日"));
+        int week_int = week_list.indexOf(week) + 1;
+        Calendar rightNow = Calendar.getInstance();
+        rightNow.setTime(current_date);
+        rightNow.add(Calendar.DAY_OF_YEAR,1 - week_int);
+        SimpleDateFormat sdf_2 = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = Date.valueOf(sdf_2.format(rightNow.getTime()));
+        wrapper_flow.ge("date",date);
+        wrapper_flow.last("limit 28");
         return passenger_flowDao.selectList(wrapper_flow);
     }
 
@@ -139,6 +152,8 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         JSONArray temp_json = (JSONArray) close_rule.get("equ");
         List<Integer> close_num_equ = JSONArray.parseArray(temp_json.toString(),Integer.class);
         int close_num = (area / close_num_equ.get(0) + (area % close_num_equ.get(0) != 0 ? 1 : 0)) + close_num_equ.get(1);
+        List<Scheduling> schedulings = new ArrayList<>();
+        List<List<Integer>> up_downs = new ArrayList<>();
         //客流量解析
         for (Passenger_Flow passenger_flow : passenger_flows) {
             String data_str = passenger_flow.getData();
@@ -283,8 +298,10 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             else {
                 schedulingDao.insert(scheduling_up);
             }
-            System.out.println(generation_scheduling(scheduling_up, up_down));
+            schedulings.add(scheduling_up);
+            up_downs.add(up_down);
         }
+        System.out.println(generation_scheduling(schedulings, up_downs));
         LocalTime time_2 = LocalTime.now();
         Duration duration = Duration.between(time_2,time_1);
         System.out.println(duration);
@@ -345,105 +362,273 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
 
     // 生成排班表
     @Override
-    public Object generation_scheduling(Scheduling scheduling, List<Integer> up_down) {
-        Date date = Date.valueOf(scheduling.getDate());
+    public Object generation_scheduling(List<Scheduling> schedulings, List<List<Integer>> up_downs) {
+        //星期表
+        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日"));
+        //需要排班天数
+        int num_scheduling = schedulings.size();
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
-        String current_week = sdf.format(date);
+        int total_week = 0;
+        int first_week_int = 0;
+        if (num_scheduling > 0) {
+            Date first_date = Date.valueOf(schedulings.get(0).getDate());
+            String first_week = sdf.format(first_date);
+            first_week_int = week_list.indexOf(first_week);
+            //共有总周数
+            if (num_scheduling <= (7 - first_week_int)) {
+                total_week = 1;
+            }
+            else {
+                total_week = (num_scheduling - 7 + first_week_int) / 7 + ((num_scheduling - 7 + first_week_int) % 7 == 0 ? 1 : 2);
+            }
+        }
+        //每周共有几天
+        List<Integer> num_day = new ArrayList<>();
+        for (int i = 0; i < total_week; i++) {
+            if (total_week == 1){
+                num_day.add(num_scheduling);
+            }
+            else if (i == 0) {
+                num_day.add(7 - first_week_int);
+            }
+            else if (i == total_week - 1) {
+                num_day.add(num_scheduling - 7 + first_week_int - (total_week - 2) * 7);
+            }
+            else {
+                num_day.add(7);
+            }
+        }
         //解析员工
         //员工的职位
         List<Integer> position = new ArrayList<>();
         //员工的偏好
         List<JSONObject> preference = new ArrayList<>();
+        //员工班次
+        List<Employee_Scheduling> employee_schedulings = new ArrayList<>();
         for (Employee employee : employees) {
             position.add(employee.getPosition());
             preference.add(JSON.parseObject(employee.getPreferenceValue()));
+            Employee_Scheduling employee_scheduling = new Employee_Scheduling();
+            employee_scheduling.setId(employee.getId());
+            employee_schedulings.add(employee_scheduling);
         }
-        //排班表数据信息
-        String data_str = scheduling.getData();
-        JSONObject data = JSON.parseObject(data_str);
-        int total = (int) data.get("total");
-        //限定职位
-        new JSONArray();
-        JSONArray limit_position;
-        //每个班次拥有的员工
-        List<List<Employee_Sort>> employee_sort = new ArrayList<>();
-        //星期表
-        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日"));
-        int week_int = week_list.indexOf(current_week) + 1;
-        for (int i = 1; i <= total; i++) {
-            new JSONArray();
-            JSONArray current = (JSONArray) data.get(String.valueOf(i));
-            //当前班次时间
-            int time_1 = (int) current.get(0);
-            int time_2 = (int) current.get(1);
-            JSONArray lunch = rest_time_rule.getJSONArray("lunch");
-            JSONArray dinner = rest_time_rule.getJSONArray("dinner");
-            if (time_1 < (int)lunch.get(0) && time_2 > (int)lunch.get(1)) {
-                JSONArray temp = data.getJSONArray(String.valueOf(i));
-                int temp_int = (int) temp.get(1) + (int)lunch.get(2);
-                temp.set(1,temp_int);
-                data.put(String.valueOf(i),temp);
+        //按周排班
+        for (int k = 0; k < total_week; k++) {
+            List<List<List<Employee_Sort>>> employee_sorts = new ArrayList<>();
+            //本周第一天的排班表序号
+            int index_scheduling;
+            if (k == 0) {
+                index_scheduling = 0;
             }
-            else if (time_1 < (int)dinner.get(0) && time_2 > (int)dinner.get(1)) {
-                JSONArray temp = data.getJSONArray(String.valueOf(i));
-                int temp_int = (int) temp.get(1) + (int)dinner.get(2);
-                temp.set(1,temp_int);
-                data.put(String.valueOf(i),temp);
-            }
-            //判断是否值班班次
-            int is_onDuty = (int) current.get(3);
-            //当前班次所拥有的员工
-            List<Employee_Sort> current_employee = new ArrayList<>();
-            Employee_Sort employee_sort_current = new Employee_Sort();
-            if (up_down.get(0) == time_1) {
-                rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, open_rule);
-            }
-            else if (up_down.get(1) == time_2) {
-                rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, close_rule);
-            }
-            else if (is_onDuty == 1) {
-                rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, on_duty_rule);
+            else if (k == total_week - 1) {
+                index_scheduling = num_day.get(0) + 7 * (total_week - 2);
             }
             else {
-                limit_position = (JSONArray) cashier_rule.get("type");
-                for (int j = 0; j < employees.size(); j++) {
-                    if (limit_position.contains(position.get(j))) {
-                        employee_sort_current.setEmployee(employees.get(j));
-                        employee_sort_current.setPriority(1);
-                        current_employee.add(employee_sort_current);
+                index_scheduling = num_day.get(0) + 7 * (k - 1);
+            }
+            for (int z = 0, index = index_scheduling; z < num_day.get(k); z++, index++) {
+                //当天班次
+                Scheduling scheduling = schedulings.get(index);
+                List<Integer> up_down = up_downs.get(index);
+                Date date = Date.valueOf(scheduling.getDate());
+                String current_week = sdf.format(date);
+                //排班表数据信息
+                String data_str = scheduling.getData();
+                JSONObject data = JSON.parseObject(data_str);
+                int total = (int) data.get("total");
+                //限定职位
+                new JSONArray();
+                JSONArray limit_position;
+                //每个班次拥有的员工
+                List<List<Employee_Sort>> employee_sort = new ArrayList<>();
+                int week_int = week_list.indexOf(current_week) + 1;
+                for (int i = 1; i <= total; i++) {
+                    new JSONArray();
+                    JSONArray current = (JSONArray) data.get(String.valueOf(i));
+                    //当前班次时间
+                    int time_1 = (int) current.get(0);
+                    int time_2 = (int) current.get(1);
+                    JSONArray lunch = rest_time_rule.getJSONArray("lunch");
+                    JSONArray dinner = rest_time_rule.getJSONArray("dinner");
+                    if (time_1 < (int)lunch.get(0) && time_2 > (int)lunch.get(1)) {
+                        JSONArray temp = data.getJSONArray(String.valueOf(i));
+                        int temp_int = (int) temp.get(1) + (int)lunch.get(2);
+                        temp.set(1,temp_int);
+                        data.put(String.valueOf(i),temp);
                     }
-                    JSONArray workday = preference.get(j).getJSONObject("workday").getJSONArray("day");
-                    JSONArray working_hours_time = preference.get(j).getJSONObject("working_hours").getJSONArray("time");
-                    //是否属于偏好时间段
-                    int temp = Math.min((time_2 - (int) working_hours_time.get(0)), (time_1 - (int) working_hours_time.get(1)));
-                    int temp_2 = Math.min((time_2 - (int) working_hours_time.get(2)), (time_1 - (int) working_hours_time.get(3)));
-                    if (workday.contains(week_int) && (temp >= (time_2 - time_1) / 2 || temp_2 >= (time_2 - time_1) / 2)) {
-                        employee_sort_current.setEmployee(employees.get(j));
-                        employee_sort_current.setPriority(5);
-                        current_employee.add(employee_sort_current);
+                    else if (time_1 < (int)dinner.get(0) && time_2 > (int)dinner.get(1)) {
+                        JSONArray temp = data.getJSONArray(String.valueOf(i));
+                        int temp_int = (int) temp.get(1) + (int)dinner.get(2);
+                        temp.set(1,temp_int);
+                        data.put(String.valueOf(i),temp);
+                    }
+                    //判断是否值班班次
+                    int is_onDuty = (int) current.get(3);
+                    //当前班次所拥有的员工
+                    List<Employee_Sort> current_employee = new ArrayList<>();
+
+                    if (up_down.get(0) - (int)open_rule.get("pre") == time_1) {
+                        Employee_Sort employee_sort_current = new Employee_Sort();
+                        rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, open_rule, employee_schedulings, week_int, i);
+                    }
+                    else if (up_down.get(1) + (int)close_rule.get("end") == time_2) {
+                        Employee_Sort employee_sort_current = new Employee_Sort();
+                        rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, close_rule, employee_schedulings, week_int, i);
+                    }
+                    else if (is_onDuty == 1) {
+                        Employee_Sort employee_sort_current = new Employee_Sort();
+                        rules_employeeSort(position, employee_sort, current_employee, employee_sort_current, on_duty_rule, employee_schedulings, week_int, i);
+                    }
+                    else {
+                        limit_position = (JSONArray) cashier_rule.get("type");
+                        for (int j = 0; j < employees.size(); j++) {
+                            if (limit_position.contains(position.get(j))) {
+                                Employee_Sort employee_sort_current = new Employee_Sort();
+                                employee_sort_current.setEmployeeId(employees.get(j).getId());
+                                employee_sort_current.setPriority(1);
+                                current_employee.add(employee_sort_current);
+                                setEmployees_Scheduling(employee_schedulings, week_int, i, j, 5);
+                            }
+                            JSONArray workday = preference.get(j).getJSONObject("workday").getJSONArray("day");
+                            JSONArray working_hours_time = preference.get(j).getJSONObject("working_hours").getJSONArray("time");
+                            //是否属于偏好时间段
+                            int temp = Math.min((time_2 - (int) working_hours_time.get(0)), (time_1 - (int) working_hours_time.get(1)));
+                            int temp_2 = Math.min((time_2 - (int) working_hours_time.get(2)), (time_1 - (int) working_hours_time.get(3)));
+                            if (workday.contains(week_int) && (temp >= (time_2 - time_1) / 2 || temp_2 >= (time_2 - time_1) / 2)) {
+                                Employee_Sort employee_sort_current = new Employee_Sort();
+                                employee_sort_current.setEmployeeId(employees.get(j).getId());
+                                employee_sort_current.setPriority(5);
+                                current_employee.add(employee_sort_current);
+                                setEmployees_Scheduling(employee_schedulings, week_int, i, j, 5);
+                            }
+                        }
+                        employee_sort.add(current_employee);
                     }
                 }
-                employee_sort.add(current_employee);
+//                System.out.println(employee_schedulings);
+                employee_sorts.add(employee_sort);
             }
-
+//            System.out.println(employee_sorts);
         }
-
-        System.out.println(employee_sort);
-        return data;
+        return employee_schedulings;
     }
 
     //开店关店规则-选取员工
-    private void rules_employeeSort(List<Integer> position, List<List<Employee_Sort>> employee_sort, List<Employee_Sort> current_employee, Employee_Sort employee_sort_current, JSONObject rule) {
+    private void rules_employeeSort(List<Integer> position,
+                                    List<List<Employee_Sort>> employee_sort,
+                                    List<Employee_Sort> current_employee,
+                                    Employee_Sort employee_sort_current,
+                                    JSONObject rule,
+                                    List<Employee_Scheduling> employee_schedulings,
+                                    int week_int,
+                                    int i) {
         JSONArray limit_position;
         limit_position = (JSONArray) rule.get("type");
 
         for (int j = 0; j < employees.size(); j++) {
             if (limit_position.contains(position.get(j))) {
-                employee_sort_current.setEmployee(employees.get(j));
+                employee_sort_current.setEmployeeId(employees.get(j).getId());
                 employee_sort_current.setPriority(1);
                 current_employee.add(employee_sort_current);
+                setEmployees_Scheduling(employee_schedulings, week_int, i, j, 1);
             }
         }
         employee_sort.add(current_employee);
+    }
+
+    private void setEmployees_Scheduling(List<Employee_Scheduling> employee_schedulings,
+                                         int week_int,
+                                         int i,
+                                         int j,
+                                         int key) {
+        JSONArray objects = new JSONArray();
+        objects.add(i);
+        objects.add(key);
+        switch (week_int) {
+            case 1 -> {
+                List<JSONArray> list_1 = employee_schedulings.get(j).getMonday();
+                if (list_1 == null) {
+                    List<JSONArray> temp = new ArrayList<>();
+                    temp.add(objects);
+                    employee_schedulings.get(j).setMonday(temp);
+                }
+                else {
+                    list_1.add(objects);
+                    employee_schedulings.get(j).setMonday(list_1);
+                }
+            }
+            case 2 -> {
+                List<JSONArray> list_2 = employee_schedulings.get(j).getTuesday();
+                if (list_2 == null) {
+                    List<JSONArray> temp = new ArrayList<>();
+                    temp.add(objects);
+                    employee_schedulings.get(j).setTuesday(temp);
+                }
+                else {
+                    list_2.add(objects);
+                    employee_schedulings.get(j).setTuesday(list_2);
+                }
+            }
+            case 3 -> {
+                List<JSONArray> list_3 = employee_schedulings.get(j).getWednesday();
+                if (list_3 == null) {
+                    List<JSONArray> temp = new ArrayList<>();
+                    temp.add(objects);
+                    employee_schedulings.get(j).setWednesday(temp);
+                }
+                else {
+                    list_3.add(objects);
+                    employee_schedulings.get(j).setWednesday(list_3);
+                }
+            }
+            case 4 -> {
+                List<JSONArray> list_4 = employee_schedulings.get(j).getThursday();
+                if (list_4 == null) {
+                    List<JSONArray> temp = new ArrayList<>();
+                    temp.add(objects);
+                    employee_schedulings.get(j).setThursday(temp);
+                }
+                else {
+                    list_4.add(objects);
+                    employee_schedulings.get(j).setThursday(list_4);
+                }
+            }
+            case 5 -> {
+                List<JSONArray> list_5 = employee_schedulings.get(j).getFriday();
+                if (list_5 == null) {
+                    List<JSONArray> temp = new ArrayList<>();
+                    temp.add(objects);
+                    employee_schedulings.get(j).setFriday(temp);
+                }
+                else {
+                    list_5.add(objects);
+                    employee_schedulings.get(j).setFriday(list_5);
+                }
+            }
+            case 6 -> {
+                List<JSONArray> list_6 = employee_schedulings.get(j).getSaturday();
+                if (list_6 == null) {
+                    List<JSONArray> temp = new ArrayList<>();
+                    temp.add(objects);
+                    employee_schedulings.get(j).setSaturday(temp);
+                }
+                else {
+                    list_6.add(objects);
+                    employee_schedulings.get(j).setSaturday(list_6);
+                }
+            }
+            case 7 -> {
+                List<JSONArray> list_7 = employee_schedulings.get(j).getSunday();
+                if (list_7 == null) {
+                    List<JSONArray> temp = new ArrayList<>();
+                    temp.add(objects);
+                    employee_schedulings.get(j).setSunday(temp);
+                }
+                else {
+                    list_7.add(objects);
+                    employee_schedulings.get(j).setSunday(list_7);
+                }
+            }
+        }
     }
 }

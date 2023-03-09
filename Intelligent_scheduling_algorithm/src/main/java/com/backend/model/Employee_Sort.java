@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class Employee_Sort {
-    private Employee employee;
+    private String employeeId;
     private int priority;
 }

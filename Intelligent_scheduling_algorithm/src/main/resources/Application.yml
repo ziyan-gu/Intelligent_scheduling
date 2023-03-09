@@ -21,7 +21,7 @@ spring:
 
 
 server:
-  port: 80
+  port: 8432
 
 #mybatis-plus:
 #  configuration:
