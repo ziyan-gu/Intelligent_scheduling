@@ -150,4 +150,17 @@ public class EmployeeController {
         Employee employee = employeeService.employeeLogin(email, password, request);
         return ResultUtils.success(employee);
     }
+
+    @GetMapping("/getemployeesbystore/{storeName}")
+    @ApiOperation("根据店名获取员工")
+    public BaseResponse<List<Employee>> getEmployeeByStore(@PathVariable String storeName) {
+        if (storeName == null || StringUtils.isAnyBlank(storeName)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求数据为空");
+        }
+        List<Employee> employees = employeeService.getEmployeesByStore(storeName);
+        if (employees == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "未查询到该数据");
+        }
+        return ResultUtils.success(employees);
+    }
 }

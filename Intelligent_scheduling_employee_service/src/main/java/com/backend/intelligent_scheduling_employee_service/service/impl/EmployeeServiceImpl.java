@@ -188,6 +188,22 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         }
         return store.getName();
     }
+
+    @Override
+    public List<Employee> getEmployeesByStore(String storeName) {
+        QueryWrapper<Store> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("store.name", storeName);
+        Store store = storeMapper.selectOne(queryWrapper);
+        String storeId = store.getId();
+
+        QueryWrapper<Employee> queryWrapperEmployees = new QueryWrapper<>();
+        queryWrapperEmployees.eq("employee.store", storeId);
+        List<Employee> employeeList = employeeMapper.selectList(queryWrapperEmployees);
+        if (employeeList  == null){
+            return null;
+        }
+        return employeeList;
+    }
 }
 
 
