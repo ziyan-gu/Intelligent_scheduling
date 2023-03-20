@@ -1,22 +1,27 @@
 package com.backend.intelligent_scheduling_login.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.nacos.common.utils.StringUtils;
 import com.backend.intelligent_scheduling_login.common.BaseResponse;
 import com.backend.intelligent_scheduling_login.common.ErrorCode;
 import com.backend.intelligent_scheduling_login.common.ResultUtils;
 import com.backend.intelligent_scheduling_login.exception.BusinessException;
+import com.backend.intelligent_scheduling_login.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_login.model.User;
 import com.backend.intelligent_scheduling_login.model.request.UserLoginRequest;
 import com.backend.intelligent_scheduling_login.model.request.UserRegisterRequest;
+import com.backend.intelligent_scheduling_login.model.response.Identify;
+import com.backend.intelligent_scheduling_login.model.response.LoginInfo;
+import com.backend.intelligent_scheduling_login.service.SchedulingService;
 import com.backend.intelligent_scheduling_login.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Date;
 
 @RestController
 @RequestMapping("/user")
@@ -25,6 +30,11 @@ public class UserController {
     @Autowired
     public UserService userService;
 
+    @Autowired
+    public EmployeeFeign employeeFeign;
+
+    @Autowired
+    public SchedulingService scheduling;
     @ApiOperation("用户注册")
     @PostMapping("/register")
     public BaseResponse<String> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -44,6 +54,46 @@ public class UserController {
         return ResultUtils.success(result);
     }
 
+    @ApiOperation("用户员工一起的登录(Web端使用)")
+    @PostMapping("/logins")
+    public BaseResponse<Object> userLogins(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
+        }
+        String account = userLoginRequest.getAccount();
+        String password = userLoginRequest.getPassword();
+
+        if (StringUtils.isAnyBlank(account,password)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"输入存在空格");
+        }
+
+        Identify identify = new Identify();
+
+        if (userService.isUser(account, password)) {
+            // User身份验证通过，返回成功响应
+            User user = userService.userLogin(account, password,request);
+            if(user.getType().equals("admin")){
+                identify.setToken("admin-token");
+                String jsonIdentify = JSON.toJSONString(identify, SerializerFeature.WriteSlashAsSpecial);
+                return ResultUtils.success(JSONObject.parse(jsonIdentify));
+            }
+            if(user.getType().equals("store")){
+                identify.setToken("editor-token");
+                String jsonIdentify = JSON.toJSONString(identify, SerializerFeature.WriteSlashAsSpecial);
+                return ResultUtils.success(JSONObject.parse(jsonIdentify));
+            }
+        } else if (userService.isEmployee(account, password)) {
+            // Employee身份验证通过，返回成功响应
+            identify.setToken("visitor-token");
+            String jsonIdentify = JSON.toJSONString(identify, SerializerFeature.WriteSlashAsSpecial);
+            return ResultUtils.success(JSONObject.parse(jsonIdentify));
+        } else {
+            // 身份验证失败，返回错误响应
+            throw new BusinessException(ErrorCode.NULL_ERROR,"用户名不存在或密码错误");
+        }
+        return ResultUtils.success("ok");
+    }
+
     @ApiOperation("用户登录")
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
@@ -57,7 +107,71 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"输入存在空格");
         }
         User user = userService.userLogin(account, password, request);
+        if(user == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"未查询到数据");
+        }
         return ResultUtils.success(user);
+
+    }
+    @ApiOperation("用户改密")
+    @PutMapping("/changepassword")
+    public BaseResponse<String> changePasswordByAccount(@PathVariable String account, @PathVariable String password){
+        if (account == null && password == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
+        }
+        if (StringUtils.isAnyBlank(account,password)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"输入存在空格");
+        }
+        Integer result = userService.changePassword(account, password);
+        if (result == 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
+        }
+        return ResultUtils.success("ok");
     }
 
+    @ApiOperation("管理员增添门店")
+    @PostMapping("/addStore")
+    public BaseResponse<String> addStoreByUser(@RequestBody UserRegisterRequest userRegisterRequest) {
+        if (userRegisterRequest == null) {
+//            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        String account = userRegisterRequest.getAccount();
+        String name = userRegisterRequest.getName();
+        if (StringUtils.isAnyBlank(account, name)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        String result = userService.addStore(account, name);
+
+        return ResultUtils.success(result);
+    }
+
+    @ApiOperation("根据token获取用户信息(Web端登录使用)")
+    @GetMapping("info/{token}")
+    public BaseResponse<LoginInfo> loginGetInfo(@PathVariable String token) {
+        if (token == null || StringUtils.isAnyBlank(token)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        LoginInfo loginInfo = new LoginInfo();
+        token = token.substring(0, token.indexOf("-")).replace("-", "");
+        loginInfo.setRoles(token);
+        loginInfo.setAvatar("https://wping.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
+        loginInfo.setRoles(token);
+        loginInfo.setName("");
+
+        return ResultUtils.success(loginInfo);
+    }
+
+    @ApiOperation("获取排班（根据id和data）")
+    @GetMapping("/getScheduling/{id}/and/{date}")
+    public BaseResponse<Object> getSchedulingByDay(@PathVariable("id") String id, @PathVariable("date") Date date) {
+        if (id == null || date == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        Object object = scheduling.getScheduleByIdAndDate(id, date);
+
+        return ResultUtils.success(object);
+    }
 }

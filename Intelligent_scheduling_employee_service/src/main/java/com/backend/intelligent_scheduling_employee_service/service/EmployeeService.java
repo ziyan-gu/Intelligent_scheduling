@@ -22,7 +22,7 @@ public interface EmployeeService extends IService<Employee> {
      * @return 返回id
      */
 //    String addEmployee(String id, String name, String email, Integer position, String store);
-    String addNewEmployee(String name, String email, Integer position);
+    String addNewEmployee(String name, String email, Integer position, String store);
 
 
     /**

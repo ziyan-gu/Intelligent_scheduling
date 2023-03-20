@@ -1,5 +1,6 @@
 package com.backend.intelligent_scheduling_login.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,6 +20,10 @@ public class BaseResponse<T> implements Serializable {
     private T data;
     private String message;
     private String description;
+
+    public BaseResponse(){
+
+    }
 
     public BaseResponse(int code, T data, String message, String description) {
         this.code = code;

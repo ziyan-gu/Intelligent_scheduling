@@ -75,7 +75,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 //    }
 
     @Override
-    public String addNewEmployee(String name, String email, Integer position) {
+    public String addNewEmployee(String name, String email, Integer position, String store) {
 
         //邮箱匹配
         if(!UserInfoCheckUtil.isValidEmail(email)){
@@ -100,7 +100,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         employee.setPassword(encryptPassword);
         employee.setPosition(position);
         employee.setId("ok");
-        employee.setStore("null");
+        employee.setStore(store);
 
         boolean saveResult = this.save(employee);
         if(!saveResult){

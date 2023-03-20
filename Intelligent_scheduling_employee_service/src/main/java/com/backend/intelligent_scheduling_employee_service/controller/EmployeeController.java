@@ -81,12 +81,13 @@ public class EmployeeController {
         String name = employeeNewAddRequest.getName();
         String email = employeeNewAddRequest.getEmail();
         Integer position = employeeNewAddRequest.getPosition();
+        String store = employeeNewAddRequest.getStore();
 
-        if (StringUtils.isAnyBlank(name, email, position.toString())) {
+        if (StringUtils.isAnyBlank(name, email, store, position.toString())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "存在空格");
         }
 
-        String result = employeeService.addNewEmployee(name, email, position);
+        String result = employeeService.addNewEmployee(name, email, position, store);
 
         return ResultUtils.success(result);
 
@@ -103,13 +104,13 @@ public class EmployeeController {
 //        return "ok";
 //    }
 
-    @GetMapping
-    @ApiOperation("获取所有员工信息")
-    public BaseResponse<List<Employee>> getAllEmployees() {
-        List<Employee> employees = employeeService.list();
-        employees.forEach(employee -> employee.setPassword(null));
-        return ResultUtils.success(employees);
-    }
+//    @GetMapping
+//    @ApiOperation("获取所有员工信息")
+//    public BaseResponse<List<Employee>> getAllEmployees() {
+//        List<Employee> employees = employeeService.list();
+//        employees.forEach(employee -> employee.setPassword(null));
+//        return ResultUtils.success(employees);
+//    }
 
     @GetMapping("/{id}")
     @ApiOperation("获取员工信息")
@@ -151,8 +152,28 @@ public class EmployeeController {
         return ResultUtils.success(employee);
     }
 
-    @GetMapping("/getemployeesbystore/{storeName}")
-    @ApiOperation("根据店名获取员工")
+//    @PostMapping("/logins")
+//    @ApiOperation("员工登录")
+//    public BaseResponse<String> employeeLogin(@RequestBody EmployeeLoginRequest employeeLoginRequest,
+//                                              @RequestParam HttpServletRequest request) {
+//        if (employeeLoginRequest == null) {
+//            throw new BusinessException(ErrorCode.NULL_ERROR, "请求数据为空");
+//        }
+//        String email = employeeLoginRequest.getEmail();
+//        String password = employeeLoginRequest.getPassword();
+//
+//        if (StringUtils.isAnyBlank(email, password)) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入存在空格");
+//        }
+//        Employee employee = employeeService.employeeLogin(email, password, request);
+//        if(employee != null) {
+//            return ResultUtils.success("employee");
+//        }
+//        throw new BusinessException(ErrorCode.SYSTEM_ERROR, "查询失败");
+//    }
+
+    @GetMapping("/{storeName}")
+    @ApiOperation("获取所有员工(根据店铺名)")
     public BaseResponse<List<Employee>> getEmployeeByStore(@PathVariable String storeName) {
         if (storeName == null || StringUtils.isAnyBlank(storeName)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求数据为空");

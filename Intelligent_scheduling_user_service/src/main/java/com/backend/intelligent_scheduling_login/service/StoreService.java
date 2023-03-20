@@ -23,4 +23,6 @@ public interface StoreService extends IService<Store> {
      * @return 返回店铺信息
      */
     List<Store> getStoresByName(String name);
+
+
 }

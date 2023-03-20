@@ -14,9 +14,8 @@ public class ResultUtils {
      */
     public static <T> BaseResponse<T> success(T data) {
         //return new BaseResponse<>(0, data, "ok");
-        return new BaseResponse<>(2000, data, "ok");
+        return new BaseResponse<>(20000, data, "ok");
     }
-
 
     /**
      * 失败

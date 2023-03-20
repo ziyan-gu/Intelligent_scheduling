@@ -12,4 +12,6 @@ public class EmployeeNewAddRequest {
 
     private Integer position;
 
+    private String store;
+
 }

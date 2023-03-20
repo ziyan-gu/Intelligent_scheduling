@@ -6,6 +6,6 @@ import org.springframework.cloud.openfeign.FeignClient;
  * 远程调用排班算法
  */
 @FeignClient(value = "orderService")
-public interface orderFeign {
+public interface OrderFeign {
 
 }

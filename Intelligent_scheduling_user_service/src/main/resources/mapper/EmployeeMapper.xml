@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.backend.intelligent_scheduling_login.mapper.EmployeeMapper">
+
+    <resultMap id="BaseResultMap" type="com.backend.intelligent_scheduling_login.model.Employee">
+            <id property="keyId" column="key_id" jdbcType="INTEGER"/>
+            <result property="id" column="id" jdbcType="VARCHAR"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="email" column="email" jdbcType="VARCHAR"/>
+            <result property="position" column="position" jdbcType="INTEGER"/>
+            <result property="store" column="store" jdbcType="VARCHAR"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
+            <result property="preferenceValue" column="preference_value" jdbcType="OTHER"/>
+            <result property="isdelete" column="isDelete" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        key_id,id,name,
+        email,position,store,
+        password,preference_value,isDelete
+    </sql>
+</mapper>
