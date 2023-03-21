@@ -134,31 +134,44 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         for (int i = 0; i < 5; i++) {
             if (!JSON.parseObject(scheduling_rules.get(i).getRuleValue()).getJSONArray("type").get(0).equals("-1")) {
                 switch (scheduling_rules.get(i).getRuleType()) {
-                    case "open" -> open_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                    case "close" -> close_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                    case "flow" -> flow_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                    case "on_duty" -> on_duty_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                    case "cashier" -> cashier_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                    case "open" :
+                        open_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                        break;
+                    case "close" :
+                        close_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                        break;
+                    case "flow" :
+                        flow_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                        break;
+                    case "on_duty" :
+                        on_duty_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                        break;
+                    case "cashier" :
+                        cashier_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                        break;
                 }
             }
         }
 
         for (int i = 0; i < 3; i++) {
             switch (fixed_rules.get(i).getRuleType()) {
-                case "business_hours" -> {
+                case "business_hours" : {
                     if (!JSON.parseObject(fixed_rules.get(i).getRuleValue()).getJSONArray("dayoff").get(0).equals("-1")){
                         business_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
                     }
+                    break;
                 }
-                case "working_hours" -> {
+                case "working_hours" : {
                     if (!JSON.parseObject(fixed_rules.get(i).getRuleValue()).get("a").equals("-1")) {
                         working_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
                     }
+                    break;
                 }
-                case "rest_time" -> {
+                case "rest_time" : {
                     if (!JSON.parseObject(fixed_rules.get(i).getRuleValue()).get("rest").equals("-1")) {
                         rest_time_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
                     }
+                    break;
                 }
             }
         }
@@ -615,13 +628,27 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         List<JSONArray> employee_nowData = new ArrayList<>();
         //获取当前员工当天班次信息
         switch (key) {
-            case 1 -> employee_nowData = employee_scheduling.getMonday();
-            case 2 -> employee_nowData = employee_scheduling.getTuesday();
-            case 3 -> employee_nowData = employee_scheduling.getWednesday();
-            case 4 -> employee_nowData = employee_scheduling.getThursday();
-            case 5 -> employee_nowData = employee_scheduling.getFriday();
-            case 6 -> employee_nowData = employee_scheduling.getSaturday();
-            case 7 -> employee_nowData = employee_scheduling.getSunday();
+            case 1 :
+                employee_nowData = employee_scheduling.getMonday();
+                break;
+            case 2 :
+                employee_nowData = employee_scheduling.getTuesday();
+                break;
+            case 3 :
+                employee_nowData = employee_scheduling.getWednesday();
+                break;
+            case 4 :
+                employee_nowData = employee_scheduling.getThursday();
+                break;
+            case 5 :
+                employee_nowData = employee_scheduling.getFriday();
+                break;
+            case 6 :
+                employee_nowData = employee_scheduling.getSaturday();
+                break;
+            case 7 :
+                employee_nowData = employee_scheduling.getSunday();
+                break;
         }
         //班次初始索引
         int temp_index;
@@ -631,13 +658,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             //超过每天/每周时长
             if (day_time.get(h) > (int) working_hours_rule.get("b")) {
                 switch (key) {
-                    case 1 -> employee_schedulings.get(h).setMonday(null);
-                    case 2 -> employee_schedulings.get(h).setTuesday(null);
-                    case 3 -> employee_schedulings.get(h).setWednesday(null);
-                    case 4 -> employee_schedulings.get(h).setThursday(null);
-                    case 5 -> employee_schedulings.get(h).setFriday(null);
-                    case 6 -> employee_schedulings.get(h).setSaturday(null);
-                    case 7 -> employee_schedulings.get(h).setSunday(null);
+                    case 1 : {
+                        employee_schedulings.get(h).setMonday(null);
+                        break;
+                    }
+                    case 2 : {
+                        employee_schedulings.get(h).setTuesday(null);
+                        break;
+                    }
+                    case 3 : {
+                        employee_schedulings.get(h).setWednesday(null);
+                        break;
+                    }
+                    case 4 : {
+                        employee_schedulings.get(h).setThursday(null);
+                        break;
+                    }
+                    case 5 : {
+                        employee_schedulings.get(h).setFriday(null);
+                        break;
+                    }
+                    case 6 : {
+                        employee_schedulings.get(h).setSaturday(null);
+                        break;
+                    }
+                    case 7 : {
+                        employee_schedulings.get(h).setSunday(null);
+                        break;
+                    }
                 }
                 List<List<Integer>> op = new ArrayList<>();
                 for (int l = 0; l < employee_sorts.get(i + 1 - first_day_int).size(); l++) {
@@ -704,13 +752,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             }
             List<JSONArray> sort_employee = new ArrayList<>();
             switch (key) {
-                case 1 -> sort_employee = sort_employee_scheduling.getMonday();
-                case 2 -> sort_employee = sort_employee_scheduling.getTuesday();
-                case 3 -> sort_employee = sort_employee_scheduling.getWednesday();
-                case 4 -> sort_employee = sort_employee_scheduling.getThursday();
-                case 5 -> sort_employee = sort_employee_scheduling.getFriday();
-                case 6 -> sort_employee = sort_employee_scheduling.getSaturday();
-                case 7 -> sort_employee = sort_employee_scheduling.getSunday();
+                case 1 : {
+                    sort_employee = sort_employee_scheduling.getMonday();
+                    break;
+                }
+                case 2 : {
+                    sort_employee = sort_employee_scheduling.getTuesday();
+                    break;
+                }
+                case 3 : {
+                    sort_employee = sort_employee_scheduling.getWednesday();
+                    break;
+                }
+                case 4 : {
+                    sort_employee = sort_employee_scheduling.getThursday();
+                    break;
+                }
+                case 5 : {
+                    sort_employee = sort_employee_scheduling.getFriday();
+                    break;
+                }
+                case 6 : {
+                    sort_employee = sort_employee_scheduling.getSaturday();
+                    break;
+                }
+                case 7 : {
+                    sort_employee = sort_employee_scheduling.getSunday();
+                    break;
+                }
             }
             //班次序号
             int scheduling_index = 0;
@@ -733,13 +802,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
 //                System.out.println(temp_sort_employee_scheduling);
                 List<JSONArray> temp_sort_employee = new ArrayList<>();
                 switch (key) {
-                    case 1 -> temp_sort_employee = temp_sort_employee_scheduling.getMonday();
-                    case 2 -> temp_sort_employee = temp_sort_employee_scheduling.getTuesday();
-                    case 3 -> temp_sort_employee = temp_sort_employee_scheduling.getWednesday();
-                    case 4 -> temp_sort_employee = temp_sort_employee_scheduling.getThursday();
-                    case 5 -> temp_sort_employee = temp_sort_employee_scheduling.getFriday();
-                    case 6 -> temp_sort_employee = temp_sort_employee_scheduling.getSaturday();
-                    case 7 -> temp_sort_employee = temp_sort_employee_scheduling.getSunday();
+                    case 1 : {
+                        temp_sort_employee = temp_sort_employee_scheduling.getMonday();
+                        break;
+                    }
+                    case 2 : {
+                        temp_sort_employee = temp_sort_employee_scheduling.getTuesday();
+                        break;
+                    }
+                    case 3 : {
+                        temp_sort_employee = temp_sort_employee_scheduling.getWednesday();
+                        break;
+                    }
+                    case 4 : {
+                        temp_sort_employee = temp_sort_employee_scheduling.getThursday();
+                        break;
+                    }
+                    case 5 : {
+                        temp_sort_employee = temp_sort_employee_scheduling.getFriday();
+                        break;
+                    }
+                    case 6 : {
+                        temp_sort_employee = temp_sort_employee_scheduling.getSaturday();
+                        break;
+                    }
+                    case 7 : {
+                        temp_sort_employee = temp_sort_employee_scheduling.getSunday();
+                        break;
+                    }
                 }
                 //排序
                 sort_scheduling(temp_sort_employee);
@@ -781,13 +871,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 }
                 List<JSONArray> jsonArray = new ArrayList<>();
                 switch (key) {
-                    case 1 -> jsonArray = employee_schedulings.get(remove_index).getMonday();
-                    case 2 -> jsonArray = employee_schedulings.get(remove_index).getTuesday();
-                    case 3 -> jsonArray = employee_schedulings.get(remove_index).getWednesday();
-                    case 4 -> jsonArray = employee_schedulings.get(remove_index).getThursday();
-                    case 5 -> jsonArray = employee_schedulings.get(remove_index).getFriday();
-                    case 6 -> jsonArray = employee_schedulings.get(remove_index).getSaturday();
-                    case 7 -> jsonArray = employee_schedulings.get(remove_index).getSunday();
+                    case 1 : {
+                        jsonArray = employee_schedulings.get(remove_index).getMonday();
+                        break;
+                    }
+                    case 2 : {
+                        jsonArray = employee_schedulings.get(remove_index).getTuesday();
+                        break;
+                    }
+                    case 3 : {
+                        jsonArray = employee_schedulings.get(remove_index).getWednesday();
+                        break;
+                    }
+                    case 4 : {
+                        jsonArray = employee_schedulings.get(remove_index).getThursday();
+                        break;
+                    }
+                    case 5 : {
+                        jsonArray = employee_schedulings.get(remove_index).getFriday();
+                        break;
+                    }
+                    case 6 : {
+                        jsonArray = employee_schedulings.get(remove_index).getSaturday();
+                        break;
+                    }
+                    case 7 : {
+                        jsonArray = employee_schedulings.get(remove_index).getSunday();
+                        break;
+                    }
                 }
                 List<Integer> op_2 = new ArrayList<>();
                 for (int m = jsonArray.size() - 1; m >= 0; m--) {
@@ -798,13 +909,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 }
                 for (Integer integer : op_2) {
                     switch (key) {
-                        case 1 -> employee_schedulings.get(remove_index).getMonday().remove((int) integer);
-                        case 2 -> employee_schedulings.get(remove_index).getTuesday().remove((int) integer);
-                        case 3 -> employee_schedulings.get(remove_index).getWednesday().remove((int) integer);
-                        case 4 -> employee_schedulings.get(remove_index).getThursday().remove((int) integer);
-                        case 5 -> employee_schedulings.get(remove_index).getFriday().remove((int) integer);
-                        case 6 -> employee_schedulings.get(remove_index).getSaturday().remove((int) integer);
-                        case 7 -> employee_schedulings.get(remove_index).getSunday().remove((int) integer);
+                        case 1 : {
+                            employee_schedulings.get(remove_index).getMonday().remove((int) integer);
+                            break;
+                        }
+                        case 2 : {
+                            employee_schedulings.get(remove_index).getTuesday().remove((int) integer);
+                            break;
+                        }
+                        case 3 : {
+                            employee_schedulings.get(remove_index).getWednesday().remove((int) integer);
+                            break;
+                        }
+                        case 4 : {
+                            employee_schedulings.get(remove_index).getThursday().remove((int) integer);
+                            break;
+                        }
+                        case 5 : {
+                            employee_schedulings.get(remove_index).getFriday().remove((int) integer);
+                            break;
+                        }
+                        case 6 : {
+                            employee_schedulings.get(remove_index).getSaturday().remove((int) integer);
+                            break;
+                        }
+                        case 7 : {
+                            employee_schedulings.get(remove_index).getSunday().remove((int) integer);
+                            break;
+                        }
                     }
                 }
             }
@@ -823,13 +955,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             int time_2 = (int) jsonArray.get(1);    //结束时间
             List<JSONArray> time_temp = new ArrayList<>();
             switch (key) {
-                case 1 -> time_temp = employee_schedulings.get(index_employee).getMonday();
-                case 2 -> time_temp = employee_schedulings.get(index_employee).getTuesday();
-                case 3 -> time_temp = employee_schedulings.get(index_employee).getWednesday();
-                case 4 -> time_temp = employee_schedulings.get(index_employee).getThursday();
-                case 5 -> time_temp = employee_schedulings.get(index_employee).getFriday();
-                case 6 -> time_temp = employee_schedulings.get(index_employee).getSaturday();
-                case 7 -> time_temp = employee_schedulings.get(index_employee).getSunday();
+                case 1 : {
+                    time_temp = employee_schedulings.get(index_employee).getMonday();
+                    break;
+                }
+                case 2 : {
+                    time_temp = employee_schedulings.get(index_employee).getTuesday();
+                    break;
+                }
+                case 3 : {
+                    time_temp = employee_schedulings.get(index_employee).getWednesday();
+                    break;
+                }
+                case 4 : {
+                    time_temp = employee_schedulings.get(index_employee).getThursday();
+                    break;
+                }
+                case 5 : {
+                    time_temp = employee_schedulings.get(index_employee).getFriday();
+                    break;
+                }
+                case 6 : {
+                    time_temp = employee_schedulings.get(index_employee).getSaturday();
+                    break;
+                }
+                case 7 : {
+                    time_temp = employee_schedulings.get(index_employee).getSunday();
+                    break;
+                }
             }
             for (int j = 0; j < time_temp.size(); j++) {
                 int time_temp_1 = (int) data_obj.getJSONArray(String.valueOf(time_temp.get(j).get(0))).get(0);
@@ -846,13 +999,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                         employee_sorts.get(i + 1 - first_day_int).get( (int) time_temp.get(j).get(0) - 1).remove((int) value);
                     }
                     switch (key) {
-                        case 1 -> employee_schedulings.get(index_employee).getMonday().remove(j);
-                        case 2 -> employee_schedulings.get(index_employee).getTuesday().remove(j);
-                        case 3 -> employee_schedulings.get(index_employee).getWednesday().remove(j);
-                        case 4 -> employee_schedulings.get(index_employee).getThursday().remove(j);
-                        case 5 -> employee_schedulings.get(index_employee).getFriday().remove(j);
-                        case 6 -> employee_schedulings.get(index_employee).getSaturday().remove(j);
-                        case 7 -> employee_schedulings.get(index_employee).getSunday().remove(j);
+                        case 1 : {
+                            employee_schedulings.get(index_employee).getMonday().remove(j);
+                            break;
+                        }
+                        case 2 : {
+                            employee_schedulings.get(index_employee).getTuesday().remove(j);
+                            break;
+                        }
+                        case 3 : {
+                            employee_schedulings.get(index_employee).getWednesday().remove(j);
+                            break;
+                        }
+                        case 4 : {
+                            employee_schedulings.get(index_employee).getThursday().remove(j);
+                            break;
+                        }
+                        case 5 : {
+                            employee_schedulings.get(index_employee).getFriday().remove(j);
+                            break;
+                        }
+                        case 6 : {
+                            employee_schedulings.get(index_employee).getSaturday().remove(j);
+                            break;
+                        }
+                        case 7 : {
+                            employee_schedulings.get(index_employee).getSunday().remove(j);
+                            break;
+                        }
                     }
                     j--;
                 }
@@ -914,7 +1088,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         objects.add(i);
         objects.add(key);
         switch (week_int) {
-            case 1 -> {
+            case 1 : {
                 List<JSONArray> list_1 = employee_schedulings.get(j).getMonday();
                 if (list_1 == null) {
                     List<JSONArray> temp = new ArrayList<>();
@@ -925,8 +1099,9 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     list_1.add(objects);
                     employee_schedulings.get(j).setMonday(list_1);
                 }
+                break;
             }
-            case 2 -> {
+            case 2 : {
                 List<JSONArray> list_2 = employee_schedulings.get(j).getTuesday();
                 if (list_2 == null) {
                     List<JSONArray> temp = new ArrayList<>();
@@ -937,8 +1112,9 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     list_2.add(objects);
                     employee_schedulings.get(j).setTuesday(list_2);
                 }
+                break;
             }
-            case 3 -> {
+            case 3 : {
                 List<JSONArray> list_3 = employee_schedulings.get(j).getWednesday();
                 if (list_3 == null) {
                     List<JSONArray> temp = new ArrayList<>();
@@ -949,8 +1125,9 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     list_3.add(objects);
                     employee_schedulings.get(j).setWednesday(list_3);
                 }
+                break;
             }
-            case 4 -> {
+            case 4 : {
                 List<JSONArray> list_4 = employee_schedulings.get(j).getThursday();
                 if (list_4 == null) {
                     List<JSONArray> temp = new ArrayList<>();
@@ -961,8 +1138,9 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     list_4.add(objects);
                     employee_schedulings.get(j).setThursday(list_4);
                 }
+                break;
             }
-            case 5 -> {
+            case 5 : {
                 List<JSONArray> list_5 = employee_schedulings.get(j).getFriday();
                 if (list_5 == null) {
                     List<JSONArray> temp = new ArrayList<>();
@@ -973,8 +1151,9 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     list_5.add(objects);
                     employee_schedulings.get(j).setFriday(list_5);
                 }
+                break;
             }
-            case 6 -> {
+            case 6 : {
                 List<JSONArray> list_6 = employee_schedulings.get(j).getSaturday();
                 if (list_6 == null) {
                     List<JSONArray> temp = new ArrayList<>();
@@ -985,8 +1164,9 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     list_6.add(objects);
                     employee_schedulings.get(j).setSaturday(list_6);
                 }
+                break;
             }
-            case 7 -> {
+            case 7 : {
                 List<JSONArray> list_7 = employee_schedulings.get(j).getSunday();
                 if (list_7 == null) {
                     List<JSONArray> temp = new ArrayList<>();
@@ -997,6 +1177,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     list_7.add(objects);
                     employee_schedulings.get(j).setSunday(list_7);
                 }
+                break;
             }
         }
     }
