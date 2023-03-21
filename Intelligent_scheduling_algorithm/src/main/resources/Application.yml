@@ -13,7 +13,7 @@ spring:
       discovery:
         server-addr: 47.243.243.202:8848
         username: nacos
-        password: nacos
+        password: nacos528
         service: orderService
         namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
         group: Intelligent_scheduling

@@ -154,7 +154,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 //            userMapper.update(user);
 //        }
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("account", account).set("password", password);
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        updateWrapper.eq("account", account).set("password", encryptPassword);
         int result = userMapper.update(null, updateWrapper);
         return result;
 

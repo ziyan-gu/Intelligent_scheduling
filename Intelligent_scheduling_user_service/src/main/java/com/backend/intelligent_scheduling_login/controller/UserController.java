@@ -121,11 +121,12 @@ public class UserController {
 
     }
     @ApiOperation("用户改密")
-    @PutMapping("/changepassword")
+    @PutMapping("/changepassword/{account}/and/{password}")
     public BaseResponse<String> changePasswordByAccount(@PathVariable String account, @PathVariable String password){
         if (account == null && password == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
         }
+
         if (StringUtils.isAnyBlank(account,password)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"输入存在空格");
         }
