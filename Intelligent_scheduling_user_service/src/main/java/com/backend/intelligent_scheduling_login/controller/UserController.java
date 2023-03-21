@@ -158,9 +158,10 @@ public class UserController {
 
         LoginInfo loginInfo = new LoginInfo();
         token = token.substring(0, token.indexOf("-")).replace("-", "");
-        loginInfo.setRoles(token);
-        loginInfo.setAvatar("https://wping.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-        loginInfo.setRoles(token);
+        String[] token_out = new String[1];
+        token_out[0] = token;
+        loginInfo.setRoles(token_out);
+        loginInfo.setAvatar("https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
         loginInfo.setName("");
 
         return ResultUtils.success(loginInfo);
