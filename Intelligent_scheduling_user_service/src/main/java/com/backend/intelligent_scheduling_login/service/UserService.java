@@ -4,7 +4,6 @@ import com.backend.intelligent_scheduling_login.model.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 
 /**
 * @author 86136
@@ -41,6 +40,6 @@ public interface UserService extends IService<User> {
 
     Boolean isEmployee(String account, String password);
 
-    String addStore(String account, String name);
+    String addStore(String account, String name, String company, String address, Double size);
 
 }

@@ -11,6 +11,7 @@ import com.backend.intelligent_scheduling_login.exception.BusinessException;
 import com.backend.intelligent_scheduling_login.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_login.feign.OrderFeign;
 import com.backend.intelligent_scheduling_login.model.User;
+import com.backend.intelligent_scheduling_login.model.request.UserAddStoreRequest;
 import com.backend.intelligent_scheduling_login.model.request.UserLoginRequest;
 import com.backend.intelligent_scheduling_login.model.request.UserRegisterRequest;
 import com.backend.intelligent_scheduling_login.model.response.Identify;
@@ -139,17 +140,20 @@ public class UserController {
 
     @ApiOperation("管理员增添门店")
     @PostMapping("/addStore")
-    public BaseResponse<String> addStoreByUser(@RequestBody UserRegisterRequest userRegisterRequest) {
-        if (userRegisterRequest == null) {
+    public BaseResponse<String> addStoreByUser(@RequestBody UserAddStoreRequest userAddStoreRequest) {
+        if (userAddStoreRequest == null) {
 //            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
-        String account = userRegisterRequest.getAccount();
-        String name = userRegisterRequest.getName();
+        String account = userAddStoreRequest.getAccount();
+        String name = userAddStoreRequest.getName();
+        Double size = userAddStoreRequest.getSize();
+        String address = userAddStoreRequest.getAddress();
+        String company = userAddStoreRequest.getCompany();
         if (StringUtils.isAnyBlank(account, name)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
-        String result = userService.addStore(account, name);
+        String result = userService.addStore(account, name, company, address, size);
 
         return ResultUtils.success(result);
     }

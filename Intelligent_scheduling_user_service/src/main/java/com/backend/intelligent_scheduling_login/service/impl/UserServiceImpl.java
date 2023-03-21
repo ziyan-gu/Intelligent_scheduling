@@ -5,8 +5,10 @@ import com.backend.intelligent_scheduling_login.common.ErrorCode;
 import com.backend.intelligent_scheduling_login.common.UserInfoCheckUtil;
 import com.backend.intelligent_scheduling_login.exception.BusinessException;
 import com.backend.intelligent_scheduling_login.mapper.EmployeeMapper;
+import com.backend.intelligent_scheduling_login.mapper.StoreMapper;
 import com.backend.intelligent_scheduling_login.mapper.UserMapper;
 import com.backend.intelligent_scheduling_login.model.Employee;
+import com.backend.intelligent_scheduling_login.model.Store;
 import com.backend.intelligent_scheduling_login.model.User;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -34,6 +36,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private StoreMapper storeMapper;
 
     @Resource
     private EmployeeMapper employeeMapper;
@@ -188,7 +193,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public String addStore(String account, String name) {
+    public String addStore(String account, String name, String company, String address, Double size) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("account", account).eq("name", name);
         long count = userMapper.selectCount(queryWrapper);
@@ -200,16 +205,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //2.加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
+        //查询分店个数
+        QueryWrapper<Store> queryWrapperStore = new QueryWrapper<>();
+
+        queryWrapper.like("id", company + "_");
+
+        long countStore = storeMapper.selectCount(queryWrapperStore) + 1;
+        if (countStore <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "为查询到相关主公司");
+        }
+
+        String id = company + "_" + countStore;
         //插入数据
         User user = new User();
         user.setAccount(account);
         user.setPassword(encryptPassword);
         user.setType("store");
-        user.setId(UUID.randomUUID().toString());
+        user.setId(id);
         user.setName(name);
+
+        Store store = new Store();
+        store.setName(name);
+        store.setCompany(company);
+        store.setSize(size);
+        store.setAddress(address);
+        store.setId(id);
+
         boolean saveResult = this.save(user);
         if (!saveResult) {
-            throw new BusinessException(ErrorCode.NO_AUTH, "保存失败");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "user保存失败");
+        }
+
+        int saveResultForStore = storeMapper.insert(store);
+        if(saveResultForStore == 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"store保存失败");
         }
         return user.getAccount();
     }
