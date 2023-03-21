@@ -9,6 +9,7 @@ import com.backend.intelligent_scheduling_login.common.ErrorCode;
 import com.backend.intelligent_scheduling_login.common.ResultUtils;
 import com.backend.intelligent_scheduling_login.exception.BusinessException;
 import com.backend.intelligent_scheduling_login.feign.EmployeeFeign;
+import com.backend.intelligent_scheduling_login.feign.OrderFeign;
 import com.backend.intelligent_scheduling_login.model.User;
 import com.backend.intelligent_scheduling_login.model.request.UserLoginRequest;
 import com.backend.intelligent_scheduling_login.model.request.UserRegisterRequest;
@@ -18,6 +19,7 @@ import com.backend.intelligent_scheduling_login.service.SchedulingService;
 import com.backend.intelligent_scheduling_login.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +37,8 @@ public class UserController {
 
     @Autowired
     public EmployeeFeign employeeFeign;
+    @Autowired
+    public OrderFeign orderFeign;
 
     @Autowired
     public SchedulingService scheduling;
@@ -194,5 +198,16 @@ public class UserController {
 
         Object object = scheduling.getScheduleByIdAndDate(id, sqlDate);
         return ResultUtils.success(JSONObject.parse(object.toString()));
+    }
+
+    @ApiOperation("根据店铺id生成排班")
+    @GetMapping("/generateScheduling/{id}")
+    public BaseResponse<Object> getSchedulingByDay(@PathVariable("id") String id){
+        if (id == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        Object scheduling = orderFeign.getScheduling(id);
+
+        return ResultUtils.success(JSONObject.parse(scheduling.toString()));
     }
 }

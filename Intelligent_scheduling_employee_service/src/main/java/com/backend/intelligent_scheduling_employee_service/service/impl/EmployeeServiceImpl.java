@@ -1,11 +1,13 @@
 package com.backend.intelligent_scheduling_employee_service.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.nacos.common.utils.StringUtils;
 import com.backend.intelligent_scheduling_employee_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_employee_service.common.UserInfoCheckUtil;
 import com.backend.intelligent_scheduling_employee_service.exception.BusinessException;
 import com.backend.intelligent_scheduling_employee_service.mapper.StoreMapper;
 import com.backend.intelligent_scheduling_employee_service.model.Store;
+import com.backend.intelligent_scheduling_employee_service.model.preference.Preference;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -75,7 +77,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 //    }
 
     @Override
-    public String addNewEmployee(String name, String email, Integer position, String store) {
+    public String addNewEmployee(String name, String email, Integer position, String store) throws JsonProcessingException {
 
         //邮箱匹配
         if(!UserInfoCheckUtil.isValidEmail(email)){
@@ -87,7 +89,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         queryWrapper.eq("email", email);
         long count = employeeMapper.selectCount(queryWrapper);
         if(count>0){
-            return null;
+            return null ;
         }
 
         //员工起始密码均为123456 进行加密
@@ -95,6 +97,14 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         String password = "123456";
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
+        //偏好初始值设定
+        String preference = "{\"workday\": {\"day\": [-1]}, \"working_hours\": {\"time\": [-1]}, \"shift_duration\": " +
+                "{\"day\": -1, \"week\": -1}}";
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(preference);
+
+        employee.setPreferenceValue(JSONObject.parse(json));
         employee.setName(name);
         employee.setEmail(email);
         employee.setPassword(encryptPassword);

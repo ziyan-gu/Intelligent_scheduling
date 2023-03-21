@@ -87,8 +87,15 @@ public class EmployeeController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "存在空格");
         }
 
-        String result = employeeService.addNewEmployee(name, email, position, store);
-
+        String result = null;
+        try {
+            result = employeeService.addNewEmployee(name, email, position, store);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        if (result == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "储存失败");
+        }
         return ResultUtils.success(result);
 
 
