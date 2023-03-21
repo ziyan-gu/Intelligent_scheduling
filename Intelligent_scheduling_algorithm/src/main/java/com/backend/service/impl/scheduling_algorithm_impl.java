@@ -25,15 +25,23 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     //员工信息
     private List<Employee> employees = new ArrayList<>();
     //解析自定义规则值
-    private JSONObject open_rule = new JSONObject();
-    private JSONObject close_rule = new JSONObject();
-    private JSONObject flow_rule = new JSONObject();
-    private JSONObject on_duty_rule = new JSONObject();
-    private JSONObject cashier_rule = new JSONObject();
+    private final String open_str = "{\"equ\": 100, \"pre\": 1, \"type\": [1, 2, 3, 5]}";
+    private JSONObject open_rule = JSON.parseObject(open_str);
+    private final String close_str = "{\"end\": 2, \"equ\": [80, 1], \"type\": [1, 2, 6]}";
+    private JSONObject close_rule = JSON.parseObject(close_str);
+    private final String flow_str = "{\"pre\": 3.8, \"type\": [0]}";
+    private JSONObject flow_rule = JSON.parseObject(flow_str);
+    private final String on_duty_str = "{\"num\": 1, \"type\": [4]}";
+    private JSONObject on_duty_rule = JSON.parseObject(on_duty_str);
+    private final String cashier_str = "{\"num\": 1, \"type\": [4]}";
+    private JSONObject cashier_rule = JSON.parseObject(cashier_str);
     //解析固定规则值
-    private JSONObject business_hours_rule = new JSONObject();
-    private JSONObject working_hours_rule = new JSONObject();
-    private JSONObject rest_time_rule = new JSONObject();
+    private final String business_hours_str = "{\"dayoff\": [10, 22], \"workingday\": [9, 21]}";
+    private JSONObject business_hours_rule = JSON.parseObject(business_hours_str);
+    private final String working_hours_str = "{\"a\": 40, \"b\": 8, \"c\": [2, 4], \"d\": 4}";
+    private JSONObject working_hours_rule = JSON.parseObject(working_hours_str);
+    private final String rest_time_str = "{\"rest\": 0.5, \"lunch\": [11, 14, 0.5], \"dinner\": [17, 20, 0.5]}";
+    private JSONObject rest_time_rule = JSON.parseObject(rest_time_str);
 
     private final Passenger_FlowDao passenger_flowDao;
     private final Scheduling_RulesDao scheduling_rulesDao;
@@ -124,20 +132,34 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         employees = getEmployee(id);
 
         for (int i = 0; i < 5; i++) {
-            switch (scheduling_rules.get(i).getRuleType()) {
-                case "open" -> open_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                case "close" -> close_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                case "flow" -> flow_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                case "on_duty" -> on_duty_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
-                case "cashier" -> cashier_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+            if (!JSON.parseObject(scheduling_rules.get(i).getRuleValue()).getJSONArray("type").get(0).equals("-1")) {
+                switch (scheduling_rules.get(i).getRuleType()) {
+                    case "open" -> open_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                    case "close" -> close_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                    case "flow" -> flow_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                    case "on_duty" -> on_duty_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                    case "cashier" -> cashier_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
+                }
             }
         }
 
         for (int i = 0; i < 3; i++) {
             switch (fixed_rules.get(i).getRuleType()) {
-                case "business_hours" -> business_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
-                case "working_hours" -> working_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
-                case "rest_time" -> rest_time_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
+                case "business_hours" -> {
+                    if (!JSON.parseObject(fixed_rules.get(i).getRuleValue()).getJSONArray("dayoff").get(0).equals("-1")){
+                        business_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
+                    }
+                }
+                case "working_hours" -> {
+                    if (!JSON.parseObject(fixed_rules.get(i).getRuleValue()).get("a").equals("-1")) {
+                        working_hours_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
+                    }
+                }
+                case "rest_time" -> {
+                    if (!JSON.parseObject(fixed_rules.get(i).getRuleValue()).get("rest").equals("-1")) {
+                        rest_time_rule = JSON.parseObject(fixed_rules.get(i).getRuleValue());
+                    }
+                }
             }
         }
         //开店前进行多久准备工作
@@ -487,19 +509,29 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                                 employee_sort_current.setEmployeeId(employees.get(j).getId());
                                 employee_sort_current.setPriority(1);
                                 current_employee.add(employee_sort_current);
-                                setEmployees_Scheduling(employee_schedulings, week_int, i, j, 5);
+                                setEmployees_Scheduling(employee_schedulings, week_int, i, j, 1);
+                                continue;
                             }
-                            JSONArray workday = preference.get(j).getJSONObject("workday").getJSONArray("day");
-                            JSONArray working_hours_time = preference.get(j).getJSONObject("working_hours").getJSONArray("time");
-                            //是否属于偏好时间段
-                            int temp = Math.min((time_2 - (int) working_hours_time.get(0)), (time_1 - (int) working_hours_time.get(1)));
-                            int temp_2 = Math.min((time_2 - (int) working_hours_time.get(2)), (time_1 - (int) working_hours_time.get(3)));
-                            if (workday.contains(week_int) && (temp >= (time_2 - time_1) / 2 || temp_2 >= (time_2 - time_1) / 2)) {
+                            if (!preference.get(j).getJSONObject("workday").getJSONArray("day").get(0).equals("-1")) {
+                                JSONArray workday = preference.get(j).getJSONObject("workday").getJSONArray("day");
+                                JSONArray working_hours_time = preference.get(j).getJSONObject("working_hours").getJSONArray("time");
+                                //是否属于偏好时间段
+                                int temp = Math.min((time_2 - (int) working_hours_time.get(0)), (time_1 - (int) working_hours_time.get(1)));
+                                int temp_2 = Math.min((time_2 - (int) working_hours_time.get(2)), (time_1 - (int) working_hours_time.get(3)));
+                                if (workday.contains(week_int) && (temp >= (time_2 - time_1) / 2 || temp_2 >= (time_2 - time_1) / 2)) {
+                                    Employee_Sort employee_sort_current = new Employee_Sort();
+                                    employee_sort_current.setEmployeeId(employees.get(j).getId());
+                                    employee_sort_current.setPriority(3);
+                                    current_employee.add(employee_sort_current);
+                                    setEmployees_Scheduling(employee_schedulings, week_int, i, j, 3);
+                                }
+                            }
+                            else {
                                 Employee_Sort employee_sort_current = new Employee_Sort();
                                 employee_sort_current.setEmployeeId(employees.get(j).getId());
-                                employee_sort_current.setPriority(5);
+                                employee_sort_current.setPriority(6);
                                 current_employee.add(employee_sort_current);
-                                setEmployees_Scheduling(employee_schedulings, week_int, i, j, 5);
+                                setEmployees_Scheduling(employee_schedulings, week_int, i, j, 6);
                             }
                         }
                         employee_sort.add(current_employee);
