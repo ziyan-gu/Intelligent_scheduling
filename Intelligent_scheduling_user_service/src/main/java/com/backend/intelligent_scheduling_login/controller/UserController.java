@@ -18,10 +18,13 @@ import com.backend.intelligent_scheduling_login.service.SchedulingService;
 import com.backend.intelligent_scheduling_login.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.Date;
+import java.text.ParseException;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
 @RestController
 @RequestMapping("/user")
@@ -163,15 +166,32 @@ public class UserController {
         return ResultUtils.success(loginInfo);
     }
 
-    @ApiOperation("获取排班（根据id和data）")
+//    @ApiOperation("获取排班（根据id和data）")
+//    @GetMapping("/getScheduling/{id}/and/{date}")
+//    public BaseResponse<Object> getSchedulingByDay(@PathVariable("id") String id,
+//                                                   @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+//        if (id == null || date == null || StringUtils.isAnyBlank(id)) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+//        }
+//
+//        Object object = scheduling.getScheduleByIdAndDate(id, date);
+//
+//        return ResultUtils.success(object);
+//    }
+
+    @ApiOperation("获取排班（根据id和data")
     @GetMapping("/getScheduling/{id}/and/{date}")
-    public BaseResponse<Object> getSchedulingByDay(@PathVariable("id") String id, @PathVariable("date") Date date) {
+    public BaseResponse<Object> getSchedulingByDay(@PathVariable("id") String id,
+                                                   @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws ParseException {
         if (id == null || date == null || StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
 
-        Object object = scheduling.getScheduleByIdAndDate(id, date);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date newDate = dateFormat.parse(date);
+        java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
 
-        return ResultUtils.success(object);
+        Object object = scheduling.getScheduleByIdAndDate(id, sqlDate);
+        return ResultUtils.success(JSONObject.parse(object.toString()));
     }
 }
