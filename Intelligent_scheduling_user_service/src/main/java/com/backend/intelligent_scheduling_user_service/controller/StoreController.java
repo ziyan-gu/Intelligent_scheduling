@@ -9,10 +9,7 @@ import com.backend.intelligent_scheduling_user_service.model.Store;
 import com.backend.intelligent_scheduling_user_service.service.StoreService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,7 +20,7 @@ public class StoreController {
     @Autowired
     private StoreService storeService;
 
-    @ApiOperation("根据管理员id查询店铺名")
+    @ApiOperation("根据管理员id查询店铺")
     @GetMapping("/id/{id}")
     public BaseResponse<List<Store>> getStoresById(@PathVariable String id){
         if(id == null){
@@ -38,6 +35,24 @@ public class StoreController {
             throw  new BusinessException(ErrorCode.NULL_ERROR,"未查询到数据");
         }
         return ResultUtils.success(stores);
+
+    }
+
+    @ApiOperation("根据店铺id删除店铺")
+    @DeleteMapping("/delete/{id}")
+    public BaseResponse<String> deleteStoresById(@PathVariable String id){
+        if(id == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        if (StringUtils.isAnyBlank(id)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
+        }
+
+        boolean result = storeService.deleteStoreById(id);
+        if (!result){
+            throw  new BusinessException(ErrorCode.NULL_ERROR,"删除失败");
+        }
+        return ResultUtils.success("ok");
 
     }
 
