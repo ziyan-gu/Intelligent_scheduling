@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -179,16 +180,14 @@ public class EmployeeController {
 //        throw new BusinessException(ErrorCode.SYSTEM_ERROR, "查询失败");
 //    }
 
-    @GetMapping("/{storeName}")
+    @GetMapping(value = "getAll/{storeName}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("获取所有员工(根据店铺名)")
     public BaseResponse<List<Employee>> getEmployeeByStore(@PathVariable String storeName) {
         if (storeName == null || StringUtils.isAnyBlank(storeName)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求数据为空");
         }
         List<Employee> employees = employeeService.getEmployeesByStore(storeName);
-        if (employees == null) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "未查询到该数据");
-        }
+        employees.forEach(employee -> employee.setPassword(null));
         return ResultUtils.success(employees);
     }
 }

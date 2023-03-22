@@ -1,9 +1,7 @@
 package com.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.backend.service.scheduling_algorithm;
 
 @RestController
@@ -17,5 +15,10 @@ public class UserController {
     public Object getScheduling(@PathVariable String id){
         Object o = scheduling_algorithm.generation_shift(id);
         return o;
+    }
+
+    @PostMapping("/setDefaultValueFixed")
+    public void setDefaultValueFixed(@RequestParam String admin){
+
     }
 }
