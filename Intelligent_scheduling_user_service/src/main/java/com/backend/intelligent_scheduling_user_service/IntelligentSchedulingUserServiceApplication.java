@@ -8,10 +8,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-public class IntelligentSchedulingLoginApplication {
+public class IntelligentSchedulingUserServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(IntelligentSchedulingLoginApplication.class, args);
+        SpringApplication.run(IntelligentSchedulingUserServiceApplication.class, args);
     }
 
 }
