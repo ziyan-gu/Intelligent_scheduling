@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.backend.intelligent_scheduling_login.mapper.FixedRulesMapper">
+
+    <resultMap id="BaseResultMap" type="com.backend.intelligent_scheduling_user_service.model.FixedRules">
+            <id property="ruleId" column="rule_id" jdbcType="INTEGER"/>
+            <result property="ruleType" column="rule_type" jdbcType="VARCHAR"/>
+            <result property="admin" column="admin" jdbcType="VARCHAR"/>
+            <result property="ruleValue" column="rule_value" jdbcType="OTHER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        rule_id,rule_type,admin,
+        rule_value
+    </sql>
+</mapper>

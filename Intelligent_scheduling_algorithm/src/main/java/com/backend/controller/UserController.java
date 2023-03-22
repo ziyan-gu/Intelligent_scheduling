@@ -17,8 +17,8 @@ public class UserController {
         return o;
     }
 
-    @PostMapping("/setDefaultValueFixed")
-    public void setDefaultValueFixed(@RequestParam String admin){
-
-    }
+//    @PostMapping("/setDefaultValueFixed")
+//    public void setDefaultValueFixed(@RequestParam String admin){
+//
+//    }
 }

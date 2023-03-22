@@ -1,5 +1,5 @@
 server:
-  port: 8433
+  port: 8431
 spring:
   application:
     name: employeeService
@@ -12,7 +12,7 @@ spring:
         server-addr: 47.243.243.202:8848
         username: nacos
         password: nacos528
-        service: employeeService_test
+        service: employeeService
         namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
         group: Intelligent_scheduling
   datasource:
