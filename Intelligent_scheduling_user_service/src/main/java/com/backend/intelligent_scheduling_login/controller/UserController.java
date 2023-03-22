@@ -11,6 +11,7 @@ import com.backend.intelligent_scheduling_login.exception.BusinessException;
 import com.backend.intelligent_scheduling_login.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_login.feign.OrderFeign;
 import com.backend.intelligent_scheduling_login.model.User;
+import com.backend.intelligent_scheduling_login.model.request.ChangePassword;
 import com.backend.intelligent_scheduling_login.model.request.UserAddStoreRequest;
 import com.backend.intelligent_scheduling_login.model.request.UserLoginRequest;
 import com.backend.intelligent_scheduling_login.model.request.UserRegisterRequest;
@@ -122,16 +123,23 @@ public class UserController {
 
     }
     @ApiOperation("用户改密")
-    @PutMapping("/changepassword/{account}/and/{password}")
-    public BaseResponse<String> changePasswordByAccount(@PathVariable String account, @PathVariable String password){
-        if (account == null && password == null) {
+    @PostMapping("/changePassword")
+    public BaseResponse<String> changePasswordByAccount(@RequestBody ChangePassword changePassword){
+        if (changePassword == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
         }
+        String account = changePassword.getAccount();
+        String password = changePassword.getPassword();
+        String newPassword = changePassword.getNewPassword();
 
-        if (StringUtils.isAnyBlank(account,password)){
+        if(newPassword.length() < 6)
+        {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"修改密码过短");
+        }
+        if (StringUtils.isAnyBlank(account,password,newPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"输入存在空格");
         }
-        Integer result = userService.changePassword(account, password);
+        Integer result = userService.changePassword(account, password, newPassword);
         if (result == 0){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
         }

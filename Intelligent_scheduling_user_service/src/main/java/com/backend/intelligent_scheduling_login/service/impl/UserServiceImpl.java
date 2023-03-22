@@ -148,19 +148,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public Integer changePassword(String account, String password) {
-//        QueryWrapper<User> objectQueryWrapper = new QueryWrapper<>();
-//        objectQueryWrapper.eq(account, account);
-//        User user = userMapper.selectOne(objectQueryWrapper);
-//        if (user == null) {
-//            return null;
-//        } else {
-//            user.setPassword(password);
-//            userMapper.update(user);
-//        }
-        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+    public Integer changePassword(String account, String password, String newPassword) {
+        QueryWrapper<User> objectQueryWrapper = new QueryWrapper<>();
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
-        updateWrapper.eq("account", account).set("password", encryptPassword);
+        objectQueryWrapper.eq("account", account).eq("password", encryptPassword);
+        Long ifExist = userMapper.selectCount(objectQueryWrapper);
+        if (ifExist == 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未查询到该账户");
+        }
+        //修改密码
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        String encryptNewPassword = DigestUtils.md5DigestAsHex((SALT + newPassword).getBytes());
+        updateWrapper.eq("account", account).set("password", encryptNewPassword);
         int result = userMapper.update(null, updateWrapper);
         return result;
 

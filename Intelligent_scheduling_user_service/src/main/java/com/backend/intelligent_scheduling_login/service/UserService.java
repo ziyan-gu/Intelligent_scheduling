@@ -34,7 +34,7 @@ public interface UserService extends IService<User> {
 
     User getSafeUser(User OringinUser);
 
-    Integer changePassword(String account, String password);
+    Integer changePassword(String account, String password, String newPassword);
 
     Boolean isUser(String account, String password);
 

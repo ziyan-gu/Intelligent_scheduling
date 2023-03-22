@@ -28,5 +28,5 @@ CMD java -jar /app/user.jar --server.port=8430 & \
     java -jar /app/Intelligent_scheduling_algorithm.jar --server.port=8432
 
 
-#docker build -t intelligent-schedule .
+#docker build -t intelligent-schedule:v2 .
 #docker run -d -p 80:80 -p 8430:8430 -p 8431:8431 -p 8432:8432 intelligent-schedule
