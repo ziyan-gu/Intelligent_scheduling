@@ -12,15 +12,13 @@ import com.backend.intelligent_scheduling_user_service.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_user_service.feign.OrderFeign;
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
 import com.backend.intelligent_scheduling_user_service.model.User;
-import com.backend.intelligent_scheduling_user_service.model.request.ChangePassword;
-import com.backend.intelligent_scheduling_user_service.model.request.UserAddStoreRequest;
-import com.backend.intelligent_scheduling_user_service.model.request.UserLoginRequest;
-import com.backend.intelligent_scheduling_user_service.model.request.UserRegisterRequest;
+import com.backend.intelligent_scheduling_user_service.model.request.*;
 import com.backend.intelligent_scheduling_user_service.model.response.Identify;
 import com.backend.intelligent_scheduling_user_service.model.response.LoginInfo;
 import com.backend.intelligent_scheduling_user_service.service.FixedRulesService;
 import com.backend.intelligent_scheduling_user_service.service.SchedulingService;
 import com.backend.intelligent_scheduling_user_service.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -29,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -129,13 +128,13 @@ public class UserController {
     }
     @ApiOperation("用户改密")
     @PostMapping("/changePassword")
-    public BaseResponse<String> changePasswordByAccount(@RequestBody ChangePassword changePassword){
-        if (changePassword == null) {
+    public BaseResponse<String> changePasswordByAccount(@RequestBody ChangePasswordRequest changePasswordRequest){
+        if (changePasswordRequest == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
         }
-        String account = changePassword.getAccount();
-        String password = changePassword.getPassword();
-        String newPassword = changePassword.getNewPassword();
+        String account = changePasswordRequest.getAccount();
+        String password = changePasswordRequest.getPassword();
+        String newPassword = changePasswordRequest.getNewPassword();
 
         if(newPassword.length() < 6)
         {
@@ -231,13 +230,29 @@ public class UserController {
 
     @ApiOperation("管理员获取固定排班规则(根据管理员ID)")
     @GetMapping("/getFixedScheduling/{admin}")
-    public BaseResponse<List<FixedRules>> getFixedScheduling(@PathVariable("admin") String admin){
+    public BaseResponse<List<Object>> getFixedScheduling(@PathVariable("admin") String admin){
         if (admin == null || StringUtils.isAnyBlank(admin)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         List<FixedRules> fixedRules = fixedRulesService.getFixedRules(admin);
         fixedRules.forEach(fixedRule -> fixedRule.setRuleValue(JSONObject.parse((String) fixedRule.getRuleValue())));
-        return ResultUtils.success(fixedRules);
+        List<Object> fixedScheduling = new ArrayList<>();
+        fixedRules.forEach(fixedRule -> fixedScheduling.add(fixedRule.getRuleValue()));
+
+        return ResultUtils.success(fixedScheduling);
+    }
+
+    @ApiOperation("管理员修改固定排班规则")
+    @PostMapping("/modifyFixedScheduling")
+    public BaseResponse<String> getFixedScheduling(@RequestBody List<ModifyFixRulesRequest> modifyFixRulesRequests) throws JsonProcessingException {
+        if (modifyFixRulesRequests == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        boolean result = fixedRulesService.ModifyFixRules(modifyFixRulesRequests);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
+        }
+        return ResultUtils.success("ok");
     }
 
 }

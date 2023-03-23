@@ -1,9 +1,13 @@
 package com.backend.intelligent_scheduling_user_service.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
+import com.backend.intelligent_scheduling_user_service.model.request.ModifyFixRulesRequest;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
 import com.backend.intelligent_scheduling_user_service.service.FixedRulesService;
@@ -13,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -71,6 +76,42 @@ public class FixedRulesServiceImpl extends ServiceImpl<FixedRulesMapper, FixedRu
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"未查询到数据");
         }
         return fixedRulesList;
+    }
+
+    @Override
+    public boolean ModifyFixRules(List<ModifyFixRulesRequest> ModifyFixRulesRequest) throws JsonProcessingException {
+        int count = 0;
+        for (ModifyFixRulesRequest rule : ModifyFixRulesRequest) {
+            UpdateWrapper<FixedRules> wrapper = new UpdateWrapper<>();
+            wrapper.eq("rule_type", rule.getRuleType())
+                    .eq("admin", rule.getAdmin());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String value = objectMapper.writeValueAsString((rule.getRuleValue()));
+            FixedRules updatedRule = new FixedRules();
+            updatedRule.setRuleValue(value);
+
+            int rows = fixedRulesMapper.update(updatedRule, wrapper);
+            count = count + rows;
+        }
+
+//        for (ModifyFixRulesRequest modifyFixRulesRequest : ModifyFixRulesRequest) {
+//            String ruleType = modifyFixRulesRequest.getRuleType();
+//            String admin = modifyFixRulesRequest.getAdmin();
+//            Object ruleValue = modifyFixRulesRequest.getRuleValue();
+//            String jsonStr = JSON.toJSONString(ruleValue);
+//            byte[] jsonBytes = jsonStr.getBytes();
+//            fixedRulesMapper.update(null,
+//                    Wrappers.<FixedRules>lambdaUpdate()
+//                            .set(FixedRules::getRuleValue, jsonBytes)
+//                            .eq(FixedRules::getRuleType, ruleType)
+//                            .eq(FixedRules::getAdmin, admin));
+//        }
+        if(count == 0){
+            return false;
+        }
+        return true;
+
     }
 }
 

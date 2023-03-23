@@ -1,6 +1,7 @@
 package com.backend.intelligent_scheduling_user_service.service;
 
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
+import com.backend.intelligent_scheduling_user_service.model.request.ModifyFixRulesRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -17,4 +18,6 @@ public interface FixedRulesService extends IService<FixedRules> {
     void setDefaultValueFixed(String admin) throws JsonProcessingException;
 
     List<FixedRules> getFixedRules(String admin);
+
+    boolean ModifyFixRules(List<ModifyFixRulesRequest> modifyFixRulesRequests) throws JsonProcessingException;
 }
