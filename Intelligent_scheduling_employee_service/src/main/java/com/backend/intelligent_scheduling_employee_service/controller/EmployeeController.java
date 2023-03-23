@@ -8,6 +8,7 @@ import com.backend.intelligent_scheduling_employee_service.exception.BusinessExc
 import com.backend.intelligent_scheduling_employee_service.model.Employee;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeLoginRequest;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeNewAddRequest;
+import com.backend.intelligent_scheduling_employee_service.model.request.EmployeePreference;
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -58,7 +59,7 @@ public class EmployeeController {
 //
 //        return ResultUtils.success(result);
 
-    @GetMapping("storename/{id}")
+    @GetMapping("storeName/{id}")
     @ApiOperation("根据员工id获取员工所在店铺名")
     public BaseResponse<String> getStoreById(@PathVariable String id) {
         if (id == null || StringUtils.isAnyBlank(id)) {
@@ -131,14 +132,25 @@ public class EmployeeController {
         return ResultUtils.success(employee);
     }
 
+//    @PutMapping("/prefer/{id}")
+//    @ApiOperation("更改员工偏好")
+//    public BaseResponse<Boolean> modifyEmployeePreference(@PathVariable String id, @RequestBody Employee employee) throws JsonProcessingException {
+//        if (id == null || StringUtils.isAnyBlank(id)) {
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
+//        }
+//
+//        boolean result = employeeService.modifyEmployeePreferenceService(id, employee);
+//
+//        return ResultUtils.success(result);
+//    }
     @PutMapping("/prefer/{id}")
     @ApiOperation("更改员工偏好")
-    public BaseResponse<Boolean> modifyEmployeePreference(@PathVariable String id, @RequestBody Employee employee) throws JsonProcessingException {
+    public BaseResponse<Boolean> modifyEmployeePreference(@PathVariable String id, @RequestBody EmployeePreference employeePreference) throws JsonProcessingException {
         if (id == null || StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
         }
 
-        boolean result = employeeService.modifyEmployeePreferenceService(id, employee);
+        boolean result = employeeService.modifyEmployeePreferenceService(id, employeePreference.getPreference_value());
 
         return ResultUtils.success(result);
     }

@@ -119,14 +119,29 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         return employee.getId();
     }
 
-    @Override
-    public Boolean modifyEmployeePreferenceService(String id, Employee employee) throws JsonProcessingException {
+//    @Override
+//    public Boolean modifyEmployeePreferenceService(String id, Employee employee) throws JsonProcessingException {
+//
+//        Employee oldEmployee = this.getOne(new QueryWrapper<Employee>().eq("id", id));
+//
+//        //hashmap -> json
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String json = objectMapper.writeValueAsString(employee.getPreferenceValue());
+//        oldEmployee.setPreferenceValue(json);
+//
+//        UpdateWrapper<Employee> updateWrapper = new UpdateWrapper<>();
+//        updateWrapper.eq("id",id);
+//        boolean result = this.update(oldEmployee,updateWrapper);
+//
+//        return result;
+//    }
+    public Boolean modifyEmployeePreferenceService(String id,  Object preference) throws JsonProcessingException {
 
         Employee oldEmployee = this.getOne(new QueryWrapper<Employee>().eq("id", id));
 
         //hashmap -> json
         ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(employee.getPreferenceValue());
+        String json = objectMapper.writeValueAsString(preference);
         oldEmployee.setPreferenceValue(json);
 
         UpdateWrapper<Employee> updateWrapper = new UpdateWrapper<>();

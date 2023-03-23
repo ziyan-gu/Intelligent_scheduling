@@ -2,9 +2,11 @@ package com.backend.intelligent_scheduling_user_service.service.impl;
 
 import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
+import com.backend.intelligent_scheduling_user_service.mapper.EmployeeMapper;
 import com.backend.intelligent_scheduling_user_service.mapper.SchedulingRulesMapper;
 import com.backend.intelligent_scheduling_user_service.mapper.StoreMapper;
 import com.backend.intelligent_scheduling_user_service.mapper.UserMapper;
+import com.backend.intelligent_scheduling_user_service.model.Employee;
 import com.backend.intelligent_scheduling_user_service.model.SchedulingRules;
 import com.backend.intelligent_scheduling_user_service.model.Store;
 import com.backend.intelligent_scheduling_user_service.model.User;
@@ -29,6 +31,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
     @Resource
     private StoreMapper storeMapper;
 
+    @Resource
+    private EmployeeMapper employeeMapper;
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -60,21 +64,35 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
         QueryWrapper<Store> storeWrapper = new QueryWrapper<>();
         storeWrapper.eq("store.id", id);
         int resultStore = storeMapper.delete(storeWrapper);
-        if(resultStore == 0){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Store表删除失败");
-        }
+//        if(resultStore == 0){
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Store表删除失败");
+//        }
         QueryWrapper<User> userWrapper = new QueryWrapper<>();
         userWrapper.eq("user.id", id);
         int resultUser = userMapper.delete(userWrapper);
-        if(resultUser == 0){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"User表删除失败");
-        }
+//        if(resultUser == 0){
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"User表删除失败");
+//        }
         QueryWrapper<SchedulingRules> scheduleWrapper = new QueryWrapper<>();
         scheduleWrapper.eq("store", id);
         int resultSchedule = schedulingRulesMapper.delete(scheduleWrapper);
-        if(resultSchedule == 0){
+
+//        QueryWrapper<Employee> employeeQueryWrapper = new QueryWrapper<>();
+//        employeeQueryWrapper.eq("employee.store",id);
+//        int resultEmployee = employeeMapper.delete(employeeQueryWrapper);
+
+        if(resultStore == 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Store表删除失败");
+        }
+        if(resultUser == 0){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"User表删除失败");
         }
+        if(resultSchedule == 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Schedule表删除失败");
+        }
+//        if(resultEmployee == 0){
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Schedule表删除失败");
+//        }
         return true;
     }
 }

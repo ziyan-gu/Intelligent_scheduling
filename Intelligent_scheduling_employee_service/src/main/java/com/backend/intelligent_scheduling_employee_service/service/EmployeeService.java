@@ -28,10 +28,10 @@ public interface EmployeeService extends IService<Employee> {
     /**
      *
      * @param id 用户id
-     * @param employee 用户信息
+     * @param preference 用户信息
      * @return 是否成功
      */
-    Boolean modifyEmployeePreferenceService(String id, Employee employee) throws JsonProcessingException;
+    Boolean modifyEmployeePreferenceService(String id, Object preference) throws JsonProcessingException;
 
     /**
      * 用户登录

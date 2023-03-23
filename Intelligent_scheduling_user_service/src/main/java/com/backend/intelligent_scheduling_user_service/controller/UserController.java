@@ -10,6 +10,7 @@ import com.backend.intelligent_scheduling_user_service.common.ResultUtils;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
 import com.backend.intelligent_scheduling_user_service.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_user_service.feign.OrderFeign;
+import com.backend.intelligent_scheduling_user_service.model.FixedRules;
 import com.backend.intelligent_scheduling_user_service.model.User;
 import com.backend.intelligent_scheduling_user_service.model.request.ChangePassword;
 import com.backend.intelligent_scheduling_user_service.model.request.UserAddStoreRequest;
@@ -17,6 +18,7 @@ import com.backend.intelligent_scheduling_user_service.model.request.UserLoginRe
 import com.backend.intelligent_scheduling_user_service.model.request.UserRegisterRequest;
 import com.backend.intelligent_scheduling_user_service.model.response.Identify;
 import com.backend.intelligent_scheduling_user_service.model.response.LoginInfo;
+import com.backend.intelligent_scheduling_user_service.service.FixedRulesService;
 import com.backend.intelligent_scheduling_user_service.service.SchedulingService;
 import com.backend.intelligent_scheduling_user_service.service.UserService;
 import io.swagger.annotations.ApiOperation;
@@ -24,10 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -41,6 +45,8 @@ public class UserController {
     @Autowired
     public OrderFeign orderFeign;
 
+    @Resource
+    public FixedRulesService fixedRulesService;
     @Autowired
     public SchedulingService scheduling;
     @ApiOperation("用户注册")
@@ -222,4 +228,16 @@ public class UserController {
 
         return ResultUtils.success(JSONObject.parse(scheduling.toString()));
     }
+
+    @ApiOperation("管理员获取固定排班规则(根据管理员ID)")
+    @GetMapping("/getFixedScheduling/{admin}")
+    public BaseResponse<List<FixedRules>> getFixedScheduling(@PathVariable("admin") String admin){
+        if (admin == null || StringUtils.isAnyBlank(admin)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        List<FixedRules> fixedRules = fixedRulesService.getFixedRules(admin);
+        fixedRules.forEach(fixedRule -> fixedRule.setRuleValue(JSONObject.parse((String) fixedRule.getRuleValue())));
+        return ResultUtils.success(fixedRules);
+    }
+
 }
