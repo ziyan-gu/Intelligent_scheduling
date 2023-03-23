@@ -11,8 +11,10 @@ import com.backend.intelligent_scheduling_user_service.exception.BusinessExcepti
 import com.backend.intelligent_scheduling_user_service.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_user_service.feign.OrderFeign;
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
+import com.backend.intelligent_scheduling_user_service.model.Scheduling;
 import com.backend.intelligent_scheduling_user_service.model.User;
 import com.backend.intelligent_scheduling_user_service.model.request.*;
+import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingData;
 import com.backend.intelligent_scheduling_user_service.model.response.Identify;
 import com.backend.intelligent_scheduling_user_service.model.response.LoginInfo;
 import com.backend.intelligent_scheduling_user_service.service.FixedRulesService;
@@ -20,6 +22,7 @@ import com.backend.intelligent_scheduling_user_service.service.SchedulingService
 import com.backend.intelligent_scheduling_user_service.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
+import javafx.scene.input.DataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -201,7 +204,7 @@ public class UserController {
 //        return ResultUtils.success(object);
 //    }
 
-    @ApiOperation("获取排班（根据id和data")
+    @ApiOperation("获取排班（根据id和data）")
     @GetMapping("/getScheduling/{id}/and/{date}")
     public BaseResponse<Object> getSchedulingByDay(@PathVariable("id") String id,
                                                    @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws ParseException {
@@ -254,5 +257,27 @@ public class UserController {
         }
         return ResultUtils.success("ok");
     }
+
+    @ApiOperation("修改排班（根据ID和日期和排班）")
+    @PutMapping("/changeScheduling/{id}/and/{date}")
+    public BaseResponse<String> changeScheduling(@PathVariable(value = "id") String id,
+                                                 @PathVariable(value = "date") @DateTimeFormat(pattern =
+            "yyyy-MM-dd")String date, @RequestBody GetSchedulingData getSchedulingData) throws ParseException, JsonProcessingException {
+        if (id == null || date == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date newDate = dateFormat.parse(date);
+        java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
+
+
+        boolean result = scheduling.changeScheduleByIdAndDate(id, sqlDate, getSchedulingData.getData());
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
+        }
+        return ResultUtils.success("ok");
+    }
+
 
 }

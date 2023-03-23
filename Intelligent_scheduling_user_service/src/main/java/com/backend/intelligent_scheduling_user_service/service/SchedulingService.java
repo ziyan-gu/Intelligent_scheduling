@@ -2,6 +2,7 @@ package com.backend.intelligent_scheduling_user_service.service;
 
 import com.backend.intelligent_scheduling_user_service.model.Scheduling;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.sql.Date;
 
@@ -20,4 +21,5 @@ public interface SchedulingService extends IService<Scheduling> {
      */
     Object getScheduleByIdAndDate(String id, Date date);
 
+    boolean changeScheduleByIdAndDate(String id,Date date, Object data) throws JsonProcessingException;
 }
