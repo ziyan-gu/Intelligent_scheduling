@@ -525,7 +525,8 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                                 setEmployees_Scheduling(employee_schedulings, week_int, i, j, 1);
                                 continue;
                             }
-                            if (!preference.get(j).getJSONObject("workday").getJSONArray("day").get(0).equals("-1")) {
+                            if ((int)preference.get(j).getJSONObject("workday").getJSONArray("day").get(0) != -1
+                            && (int)preference.get(j).getJSONObject("working_hours").getJSONArray("time").get(0) != -1) {
                                 JSONArray workday = preference.get(j).getJSONObject("workday").getJSONArray("day");
                                 JSONArray working_hours_time = preference.get(j).getJSONObject("working_hours").getJSONArray("time");
                                 //是否属于偏好时间段
@@ -601,6 +602,12 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 QueryWrapper<Scheduling> wrapper_scheduling = new QueryWrapper<>();
                 wrapper_scheduling.eq("id",scheduling_up.getId());
                 wrapper_scheduling.eq("date",scheduling_up.getDate());
+                Date current_date = new Date(System.currentTimeMillis());
+                SimpleDateFormat sdf_2 = new SimpleDateFormat("yyyy-MM-dd");
+                String day_current = sdf_2.format(current_date);
+                if (day_current.compareTo(scheduling_up.getDate()) > 0) {
+                    continue;
+                }
                 if (schedulingDao.exists(wrapper_scheduling)) {
                     schedulingDao.update(scheduling_up,wrapper_scheduling);
                 }
