@@ -192,14 +192,15 @@ public class EmployeeController {
 //        throw new BusinessException(ErrorCode.SYSTEM_ERROR, "查询失败");
 //    }
 
-    @GetMapping(value = "getAll/{storeName}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation("获取所有员工(根据店铺名)")
-    public BaseResponse<List<Employee>> getEmployeeByStore(@PathVariable String storeName) {
-        if (storeName == null || StringUtils.isAnyBlank(storeName)) {
+    @GetMapping(value = "getAll/{storeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("获取所有员工(根据店铺ID)")
+    public BaseResponse<List<Employee>> getEmployeeByStoreId(@PathVariable String storeId) {
+        if (storeId == null || StringUtils.isAnyBlank(storeId)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求数据为空");
         }
-        List<Employee> employees = employeeService.getEmployeesByStore(storeName);
+        List<Employee> employees = employeeService.getEmployeesByStore(storeId);
         employees.forEach(employee -> employee.setPassword(null));
+//        employees.forEach(employee -> employee.setPreferenceValue(JSONObject.parse()));
         return ResultUtils.success(employees);
     }
 }

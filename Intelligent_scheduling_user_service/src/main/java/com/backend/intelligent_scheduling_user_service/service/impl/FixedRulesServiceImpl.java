@@ -39,20 +39,20 @@ public class FixedRulesServiceImpl extends ServiceImpl<FixedRulesMapper, FixedRu
 
         business_hours.setRuleType("business_hours");
         business_hours.setAdmin(admin);
-        String business = "{\"dayoff\": [-1], \"workingday\": [-1]}";
+        String business = "{\"dayoff\": [10, 22], \"workingday\": [9, 21]}";
         ObjectMapper objectMapper = new ObjectMapper();
         business = objectMapper.writeValueAsString(business);
         business_hours.setRuleValue(JSONObject.parse(business));
 
         working_hours.setRuleType("working_hours");
         working_hours.setAdmin(admin);
-        String working = "{\"a\": -1, \"b\": -1, \"c\": [-1], \"d\": -1}";
+        String working = "{\"a\": 40, \"b\": 8, \"c\": [2, 4], \"d\": 4}";
         working = objectMapper.writeValueAsString(working);
         working_hours.setRuleValue(JSONObject.parse(working));
 
         rest_time.setRuleType("rest_time");
         rest_time.setAdmin(admin);
-        String rest = "{\"rest\": -1, \"lunch\": [-1], \"dinner\": [-1]}";
+        String rest = "{\"rest\": 0.5, \"lunch\": [11, 14, 0.5], \"dinner\": [17, 20, 0.5]}";
         rest = objectMapper.writeValueAsString(rest);
         rest_time.setRuleValue(JSONObject.parse(rest));
 

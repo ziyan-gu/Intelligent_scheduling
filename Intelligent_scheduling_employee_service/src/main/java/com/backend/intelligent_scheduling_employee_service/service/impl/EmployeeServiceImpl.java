@@ -215,17 +215,12 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     }
 
     @Override
-    public List<Employee> getEmployeesByStore(String storeName) {
-        QueryWrapper<Store> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("store.name", storeName);
-        Store store = storeMapper.selectOne(queryWrapper);
-        String storeId = store.getId();
-
+    public List<Employee> getEmployeesByStore(String storeId) {
         QueryWrapper<Employee> queryWrapperEmployees = new QueryWrapper<>();
         queryWrapperEmployees.eq("employee.store", storeId);
         List<Employee> employeeList = employeeMapper.selectList(queryWrapperEmployees);
         if (employeeList  == null){
-            return null;
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"为查询到数据");
         }
         return employeeList;
     }

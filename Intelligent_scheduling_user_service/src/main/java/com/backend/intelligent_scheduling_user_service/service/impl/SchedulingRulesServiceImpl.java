@@ -36,31 +36,31 @@ public class SchedulingRulesServiceImpl extends ServiceImpl<SchedulingRulesMappe
 
 //        open.setRuleType("open");
         open.setStore(store);
-        String vOpen = "{\"equ\": -1, \"pre\": -1, \"type\": [-1]}";
+        String vOpen = "{\"equ\": 100, \"pre\": 1, \"type\": [1, 2, 3, 5]}";
         vOpen = objectMapper.writeValueAsString(vOpen);
         open.setRuleValue(JSONObject.parse(vOpen));
 
 //        close.setRuleType("close");
         close.setStore(store);
-        String vClose = "{\"end\": -1, \"equ\": [-1], \"type\": [-1]}";
+        String vClose = "{\"end\": 2, \"equ\": [80, 1], \"type\": [1, 2, 6]}";
         vClose = objectMapper.writeValueAsString(vClose);
         close.setRuleValue(JSONObject.parse(vClose));
 
 //        flow.setRuleType("flow");
         flow.setStore(store);
-        String vFlow = "{\"pre\": -1, \"type\": [-1]}";
+        String vFlow = "{\"pre\": 3.8, \"type\": [0]}";
         vFlow = objectMapper.writeValueAsString(vFlow);
         flow.setRuleValue(JSONObject.parse(vFlow));
 
 //        on_duty.setRuleType("on_duty");
         on_duty.setStore(store);
-        String vOnDuty = "{\"num\": -1, \"type\": [-1]}";
+        String vOnDuty = "{\"num\": 1, \"type\": [4]}";
         vOnDuty = objectMapper.writeValueAsString(vOnDuty);
         on_duty.setRuleValue(JSONObject.parse(vOnDuty));
 
 //        cashier.setRuleType("cashier");
         cashier.setStore(store);
-        String vCashier = "{\"num\": -1, \"type\": [-1]}";
+        String vCashier = "{\"num\": 1, \"type\": [4]}";
         vCashier = objectMapper.writeValueAsString(vCashier);
         cashier.setRuleValue(JSONObject.parse(vCashier));
 
