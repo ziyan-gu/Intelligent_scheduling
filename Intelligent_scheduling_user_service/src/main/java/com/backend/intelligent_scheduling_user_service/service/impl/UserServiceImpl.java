@@ -83,6 +83,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         //公司已经创建个数
         QueryWrapper<User> queryWrapperCount = new QueryWrapper<>();
         int companyCount = userMapper.countAdminUsers(queryWrapperCount);
+
         //2.加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
@@ -222,16 +223,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
         //查询分店个数
-        QueryWrapper<Store> queryWrapperStore = new QueryWrapper<>();
+//        QueryWrapper<Store> queryWrapperStore = new QueryWrapper<>();
+//
+//        queryWrapper.like("id", company + "_");
+//
+//        long countStore = storeMapper.selectCount(queryWrapperStore) + 1;
+//        if (countStore <= 0){
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR, "为查询到相关主公司");
+//        }
+//
+//        String id = company + "_" + countStore;
 
-        queryWrapper.like("id", company + "_");
-
-        long countStore = storeMapper.selectCount(queryWrapperStore) + 1;
-        if (countStore <= 0){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "为查询到相关主公司");
+        //查询分店最大值
+        String maxId = userMapper.findMaxIdByPrefix(company);
+        String id = null;
+        if (maxId == null) {
+            // 如果不存在，则返回 prefix_1
+            id =  company + "_1";
+        } else {
+            // 否则在当前编号基础上加 1
+            int max = Integer.parseInt(maxId.substring(maxId.lastIndexOf("_") + 1));
+            id =  company + "_" + (max + 1);
         }
-
-        String id = company + "_" + countStore;
 
         //添加默认值
         try {

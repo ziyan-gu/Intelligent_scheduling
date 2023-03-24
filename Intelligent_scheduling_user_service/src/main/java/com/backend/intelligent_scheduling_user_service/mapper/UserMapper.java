@@ -4,6 +4,7 @@ import com.backend.intelligent_scheduling_user_service.model.User;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 /**
@@ -16,6 +17,11 @@ import org.apache.ibatis.annotations.Select;
 public interface UserMapper extends BaseMapper<User> {
     @Select("SELECT COUNT(*) FROM user WHERE type = 'admin'")
     int countAdminUsers(QueryWrapper<User> queryWrapperCount);
+
+    // 查询以指定前缀开头的最大编号
+//    @Select("SELECT MAX(id) FROM user WHERE id LIKE CONCAT(#{prefix}, '_%')")
+    @Select("SELECT MAX(CAST(SUBSTR(id, LENGTH(#{prefix}) + 2) AS UNSIGNED)) FROM user WHERE id LIKE CONCAT(#{prefix}, '_%')")
+    String findMaxIdByPrefix(@Param("prefix") String prefix);
 }
 
 
