@@ -38,9 +38,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
     public String USER_LOGIN_STATE = "userLoginState";
     @Resource
     public EmployeeMapper employeeMapper;
-
     @Resource
     public StoreMapper storeMapper;
+
 //    @Override
 //    public String addNewEmployee(String id, String name, String email, Integer position, String store) {
 //
@@ -81,7 +81,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
         //邮箱匹配
         if(!UserInfoCheckUtil.isValidEmail(email)){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"无效的邮箱");
         }
 
         //账户不能重复
@@ -89,7 +89,26 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         queryWrapper.eq("email", email);
         long count = employeeMapper.selectCount(queryWrapper);
         if(count>0){
-            return null ;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"邮箱已存在");
+        }
+
+        //判断店铺是否存在
+        QueryWrapper<Store> storeQuery = new QueryWrapper<>();
+        storeQuery.eq("store.id", store);
+        Store one = storeMapper.selectOne(storeQuery);
+        if(one==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未找到相关店铺");
+        }
+        //id设定
+        String id = null;
+        Integer maxSuffix = employeeMapper.findMaxIdByPrefix(store);
+        if (maxSuffix == null) {
+            // 如果不存在，则返回 prefix_1
+            id =  store + "_1";
+        } else {
+            // 否则在当前编号基础上加 1
+            int newSuffix = maxSuffix + 1;
+            id =  store + "_" + newSuffix;
         }
 
         //员工起始密码均为123456 进行加密
@@ -109,7 +128,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         employee.setEmail(email);
         employee.setPassword(encryptPassword);
         employee.setPosition(position);
-        employee.setId("ok");
+        employee.setId(id);
         employee.setStore(store);
 
         boolean saveResult = this.save(employee);

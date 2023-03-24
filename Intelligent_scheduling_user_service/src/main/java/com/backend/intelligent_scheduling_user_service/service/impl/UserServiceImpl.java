@@ -276,7 +276,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if(saveResultForStore == 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"store保存失败");
         }
-        return user.getAccount();
+        return user.getId();
     }
 
 

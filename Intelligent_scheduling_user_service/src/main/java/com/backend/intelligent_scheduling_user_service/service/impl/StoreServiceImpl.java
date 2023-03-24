@@ -77,9 +77,9 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
         scheduleWrapper.eq("store", id);
         int resultSchedule = schedulingRulesMapper.delete(scheduleWrapper);
 
-//        QueryWrapper<Employee> employeeQueryWrapper = new QueryWrapper<>();
-//        employeeQueryWrapper.eq("employee.store",id);
-//        int resultEmployee = employeeMapper.delete(employeeQueryWrapper);
+        QueryWrapper<Employee> employeeQueryWrapper = new QueryWrapper<>();
+        employeeQueryWrapper.eq("employee.store",id);
+        int resultEmployee = employeeMapper.delete(employeeQueryWrapper);
 
         if(resultStore == 0){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Store表删除失败");

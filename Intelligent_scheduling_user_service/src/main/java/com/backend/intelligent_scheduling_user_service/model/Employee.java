@@ -1,9 +1,6 @@
 package com.backend.intelligent_scheduling_user_service.model;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -59,6 +56,7 @@ public class Employee implements Serializable {
     /**
      * 是否删除
      */
+    @TableLogic
     private Integer isdelete;
 
     @TableField(exist = false)

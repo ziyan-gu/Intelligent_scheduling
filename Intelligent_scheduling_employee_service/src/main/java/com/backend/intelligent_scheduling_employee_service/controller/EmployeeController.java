@@ -75,7 +75,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    @ApiOperation("增加员工")
+    @ApiOperation("增加员工(其中：store为店铺id，不然无法正确添加员工编号)")
     public BaseResponse<String> addEmployee(@RequestBody EmployeeNewAddRequest employeeNewAddRequest) {
         if (employeeNewAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
