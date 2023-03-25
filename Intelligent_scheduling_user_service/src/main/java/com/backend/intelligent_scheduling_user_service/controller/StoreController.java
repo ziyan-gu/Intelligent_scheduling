@@ -6,8 +6,10 @@ import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.common.ResultUtils;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
 import com.backend.intelligent_scheduling_user_service.model.Store;
+import com.backend.intelligent_scheduling_user_service.model.request.ModifyStoreRequest;
 import com.backend.intelligent_scheduling_user_service.service.StoreService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +57,28 @@ public class StoreController {
         return ResultUtils.success("ok");
 
     }
+
+    @ApiOperation("根据店铺id修改店铺信息")
+    @PutMapping("/modify/{id}")
+    public BaseResponse<String> modifyStoresById(@PathVariable String id,
+                                                 @RequestBody ModifyStoreRequest modifyStoreRequest){
+        if(modifyStoreRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        String storeName = modifyStoreRequest.getName();
+        String storeAddress = modifyStoreRequest.getAddress();
+        Float storeSize = modifyStoreRequest.getSize();
+
+        boolean result = storeService.ModifyStoreById(id, storeName, storeAddress, storeSize);
+        if (!result){
+            throw  new BusinessException(ErrorCode.NULL_ERROR,"修改失败");
+        }
+        return ResultUtils.success("ok");
+
+    }
+
+
 
 //    @GetMapping("/name/{name}")
 //    public BaseResponse<List<Store>> getStoresByName(@PathVariable String name){

@@ -11,6 +11,7 @@ import com.backend.intelligent_scheduling_user_service.model.SchedulingRules;
 import com.backend.intelligent_scheduling_user_service.model.Store;
 import com.backend.intelligent_scheduling_user_service.model.User;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.backend.intelligent_scheduling_user_service.service.StoreService;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,29 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
 //        if(resultEmployee == 0){
 //            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Schedule表删除失败");
 //        }
+        return true;
+    }
+
+    @Override
+    public boolean ModifyStoreById(String id, String name, String address, Float size) {
+        //是否存在
+        QueryWrapper<Store> wrapper = new QueryWrapper<>();
+        wrapper.eq("id", id);
+        Long count = storeMapper.selectCount(wrapper);
+        if (count == null || count == 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未查询到改店铺");
+        }
+
+        //更新信息
+        UpdateWrapper<Store> objectUpdateWrapper = new UpdateWrapper<>();
+        objectUpdateWrapper.eq("id", id).set("name", name).
+                set("address", address).
+                set("size", size);
+        Store store = new Store();
+        int update = storeMapper.update(store, objectUpdateWrapper);
+        if(update == 0){
+            return false;
+        }
         return true;
     }
 }

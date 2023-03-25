@@ -26,4 +26,6 @@ public interface StoreService extends IService<Store> {
 
     boolean deleteStoreById(String id);
 
+    boolean ModifyStoreById(String id, String name, String address, Float size);
+
 }
