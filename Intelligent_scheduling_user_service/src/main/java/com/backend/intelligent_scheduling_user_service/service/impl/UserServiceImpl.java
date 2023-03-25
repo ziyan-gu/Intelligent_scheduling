@@ -218,7 +218,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "该用户已存在");
         }
 
-        String password = "123456";
+        String password = "12345678";
         //2.加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
