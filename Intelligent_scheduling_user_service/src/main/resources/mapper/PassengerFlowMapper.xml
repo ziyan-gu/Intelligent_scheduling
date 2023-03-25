@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.backend.intelligent_scheduling_user_service.mapper.PassengerFlowMapper">
+
+    <resultMap id="BaseResultMap" type="com.backend.intelligent_scheduling_user_service.model.PassengerFlow">
+            <id property="id" column="id" jdbcType="VARCHAR"/>
+            <id property="date" column="date" jdbcType="DATE"/>
+            <result property="data" column="data" jdbcType="OTHER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,date,data
+    </sql>
+</mapper>

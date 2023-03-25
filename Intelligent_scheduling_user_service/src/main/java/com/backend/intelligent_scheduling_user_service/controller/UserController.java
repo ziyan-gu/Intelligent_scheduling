@@ -11,6 +11,7 @@ import com.backend.intelligent_scheduling_user_service.exception.BusinessExcepti
 import com.backend.intelligent_scheduling_user_service.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_user_service.feign.OrderFeign;
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
+import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
 import com.backend.intelligent_scheduling_user_service.model.Scheduling;
 import com.backend.intelligent_scheduling_user_service.model.User;
 import com.backend.intelligent_scheduling_user_service.model.request.*;
@@ -18,6 +19,7 @@ import com.backend.intelligent_scheduling_user_service.model.response.GetSchedul
 import com.backend.intelligent_scheduling_user_service.model.response.Identify;
 import com.backend.intelligent_scheduling_user_service.model.response.LoginInfo;
 import com.backend.intelligent_scheduling_user_service.service.FixedRulesService;
+import com.backend.intelligent_scheduling_user_service.service.PassengerFlowService;
 import com.backend.intelligent_scheduling_user_service.service.SchedulingService;
 import com.backend.intelligent_scheduling_user_service.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -47,6 +49,8 @@ public class UserController {
     @Autowired
     public OrderFeign orderFeign;
 
+    @Autowired
+    public PassengerFlowService passengerFlowService;
     @Resource
     public FixedRulesService fixedRulesService;
     @Autowired
@@ -279,5 +283,38 @@ public class UserController {
         return ResultUtils.success("ok");
     }
 
+    @ApiOperation("获取客流量(根据店铺id和日期)")
+    @GetMapping("/getPassengerFlow/{id}/and/{date}")
+    public BaseResponse<Object> getPassengerFlow(@PathVariable("id") String id,
+                                                       @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws ParseException {
+        if (id == null || StringUtils.isAnyBlank(id) || date == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date newDate = simpleDateFormat.parse(date);
+        java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
+
+        Object passengerFlow = passengerFlowService.getPassengerFlow(id, sqlDate);
+
+        return ResultUtils.success(passengerFlow);
+    }
+
+    @ApiOperation("添加客流量(根据id，日期，客流量)")
+    @PostMapping("/setPassengerFlow")
+    public BaseResponse<String> setPassengerFlow(@RequestBody PassengerFlow passengerFlow) throws JsonProcessingException {
+        if (passengerFlow == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        String id = passengerFlow.getId();
+        Date date = passengerFlow.getDate();
+        Object data = passengerFlow.getData();
+
+        java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+        boolean result = passengerFlowService.setPassengerFlow(id, sqlDate, data);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"添加失败");
+        }
+        return ResultUtils.success("ok");
+    }
 }

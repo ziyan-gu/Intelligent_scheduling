@@ -9,6 +9,7 @@ import com.backend.intelligent_scheduling_employee_service.model.Employee;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeLoginRequest;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeeNewAddRequest;
 import com.backend.intelligent_scheduling_employee_service.model.request.EmployeePreference;
+import com.backend.intelligent_scheduling_employee_service.service.AttendanceCountService;
 import com.backend.intelligent_scheduling_employee_service.service.EmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,6 +27,9 @@ public class EmployeeController {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private AttendanceCountService attendanceCountService;
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除员工")
@@ -202,5 +206,17 @@ public class EmployeeController {
         employees.forEach(employee -> employee.setPassword(null));
 //        employees.forEach(employee -> employee.setPreferenceValue(JSONObject.parse()));
         return ResultUtils.success(employees);
+    }
+
+    @GetMapping("/attend/{id}")
+    @ApiOperation("获取员工出勤次数(根据id)")
+    public BaseResponse<Integer> getEmployeeAttendanceCount(@PathVariable String id){
+        if (id == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
+        }
+
+        int count = attendanceCountService.getCount(id);
+
+        return ResultUtils.success(count);
     }
 }
