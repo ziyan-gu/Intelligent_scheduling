@@ -21,5 +21,5 @@ public interface SchedulingService extends IService<Scheduling> {
      */
     Object getScheduleByIdAndDate(String id, Date date);
 
-    boolean changeScheduleByIdAndDate(String id,Date date, Object data) throws JsonProcessingException;
+    String changeScheduleByIdAndDate(String id,Date date, Object data) throws JsonProcessingException;
 }

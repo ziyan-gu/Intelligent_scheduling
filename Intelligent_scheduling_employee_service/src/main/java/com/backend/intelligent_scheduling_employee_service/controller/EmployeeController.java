@@ -219,4 +219,18 @@ public class EmployeeController {
 
         return ResultUtils.success(count);
     }
+
+    @PutMapping("/attend/{id}")
+    @ApiOperation("增加员工出勤次数(根据id)(加一次)测试接口，不知道会不会用的上")
+    public BaseResponse<String> addEmployeeAttendanceCount(@PathVariable String id){
+        if (id == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");
+        }
+
+        boolean result = attendanceCountService.addCount(id);
+        if (!result) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"保存失败");
+        }
+        return ResultUtils.success(id + "员工增加了一次出勤");
+    }
 }

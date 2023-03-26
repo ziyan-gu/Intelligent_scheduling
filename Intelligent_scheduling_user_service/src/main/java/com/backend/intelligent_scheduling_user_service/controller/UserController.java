@@ -276,11 +276,11 @@ public class UserController {
         java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
 
 
-        boolean result = scheduling.changeScheduleByIdAndDate(id, sqlDate, getSchedulingData.getData());
-        if (!result) {
+        String result = scheduling.changeScheduleByIdAndDate(id, sqlDate, getSchedulingData.getData());
+        if (result == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
         }
-        return ResultUtils.success("ok");
+        return ResultUtils.success(result);
     }
 
     @ApiOperation("获取客流量(根据店铺id和日期)")

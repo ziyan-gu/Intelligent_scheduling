@@ -3,6 +3,7 @@ package com.backend.intelligent_scheduling_employee_service.service.impl;
 import com.backend.intelligent_scheduling_employee_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_employee_service.exception.BusinessException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.backend.intelligent_scheduling_employee_service.model.AttendanceCount;
 import com.backend.intelligent_scheduling_employee_service.service.AttendanceCountService;
@@ -36,6 +37,22 @@ public class AttendanceCountServiceImpl extends ServiceImpl<AttendanceCountMappe
         int count = attendanceCount.getCount();
         return count;
     }
+
+    @Override
+    public boolean addCount(String id) {
+        final int addCount = 1;
+        QueryWrapper<AttendanceCount> wrapper = new QueryWrapper<>();
+        wrapper.eq("id", id);
+        AttendanceCount attendanceCount = attendanceCountMapper.selectOne(wrapper);
+        attendanceCount.setCount(attendanceCount.getCount() + addCount);
+
+        int update = attendanceCountMapper.update(attendanceCount, wrapper);
+        if(update == 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"增加失败");
+        }
+        return true;
+    }
+
 }
 
 

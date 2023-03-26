@@ -36,12 +36,31 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
     }
 
     @Override
-    public boolean changeScheduleByIdAndDate(String id, Date date, Object data) throws JsonProcessingException {
-        UpdateWrapper<Scheduling> wrapper = new UpdateWrapper<>();
-        wrapper.eq("id", id).eq("date", date);
+    public String changeScheduleByIdAndDate(String id, Date date, Object data) throws JsonProcessingException {
 
+        //数据格式处理
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonData = objectMapper.writeValueAsString(data);
+
+        //是否存在
+        QueryWrapper<Scheduling> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id).eq("date", date);
+        Long count = schedulingMapper.selectCount(queryWrapper);
+        if(count == 0){
+            Scheduling s = new Scheduling();
+            s.setId(id);
+            s.setDate(date);
+            s.setData(jsonData);
+            int insert = schedulingMapper.insert(s);
+            if(insert == 0){
+                throw new BusinessException(ErrorCode.PARAMS_ERROR,"原数据不存在，并且在尝试保存为新数据时失败");
+            }
+            return "插入新数据成功";
+        }
+
+        //修改
+        UpdateWrapper<Scheduling> wrapper = new UpdateWrapper<>();
+        wrapper.eq("id", id).eq("date", date);
         Scheduling scheduling = new Scheduling();
         scheduling.setData(jsonData);
 
@@ -50,7 +69,7 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
         if (result == 0){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"保存失败，请重试");
         }
-        return true;
+        return "保存成功";
     }
 
 

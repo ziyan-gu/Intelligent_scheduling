@@ -10,4 +10,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface AttendanceCountService extends IService<AttendanceCount> {
     int getCount(String id);
+
+    boolean addCount(String id);
 }
