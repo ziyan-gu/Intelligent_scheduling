@@ -3,6 +3,7 @@ package com.backend.intelligent_scheduling_user_service.service.impl;
 import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
+import com.backend.intelligent_scheduling_user_service.service.AttendanceCountService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -27,6 +28,9 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
 
     @Autowired
     private SchedulingMapper schedulingMapper;
+
+    @Autowired
+    private AttendanceCountService attendanceCountService;
     @Override
     public Object getScheduleByIdAndDate(String id, Date date) {
         QueryWrapper<Scheduling> wrapper = new QueryWrapper<>();
@@ -55,6 +59,7 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
             if(insert == 0){
                 throw new BusinessException(ErrorCode.PARAMS_ERROR,"原数据不存在，并且在尝试保存为新数据时失败");
             }
+            attendanceCountService.updateAttendanceCount(s);
             return "插入新数据成功";
         }
 

@@ -1,6 +1,7 @@
 package com.backend.intelligent_scheduling_employee_service.service;
 
 import com.backend.intelligent_scheduling_employee_service.model.AttendanceCount;
+import com.backend.intelligent_scheduling_employee_service.model.Scheduling;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -12,4 +13,6 @@ public interface AttendanceCountService extends IService<AttendanceCount> {
     int getCount(String id);
 
     boolean addCount(String id);
+
+//    void updateAttendanceCount(Scheduling scheduling);
 }
