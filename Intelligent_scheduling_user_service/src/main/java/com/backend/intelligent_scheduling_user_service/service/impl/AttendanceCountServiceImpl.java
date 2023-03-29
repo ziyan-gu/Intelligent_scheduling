@@ -15,10 +15,7 @@ import com.backend.intelligent_scheduling_user_service.model.AttendanceCount;
 import com.backend.intelligent_scheduling_user_service.service.AttendanceCountService;
 import com.backend.intelligent_scheduling_user_service.mapper.AttendanceCountMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import springfox.documentation.spring.web.json.Json;
 
 import javax.annotation.Resource;
 import java.util.HashMap;

@@ -86,7 +86,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
         //账户不能重复
         QueryWrapper<Employee> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", email);
+        queryWrapper.eq("employee.email", email);
         long count = employeeMapper.selectCount(queryWrapper);
         if(count>0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"邮箱已存在");
@@ -116,6 +116,13 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         String password = "123456";
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
 
+        //是否重名
+        QueryWrapper<Employee> nameWrapper = new QueryWrapper<>();
+        nameWrapper.eq("store", store).eq("name", name);
+        Long nameCount = employeeMapper.selectCount(nameWrapper);
+        if(nameCount>0){
+            name = name + "(" + nameCount + ")";
+        }
         //偏好初始值设定
         String preference = "{\"workday\": {\"day\": [-1]}, \"working_hours\": {\"time\": [-1]}, \"shift_duration\": " +
                 "{\"day\": -1, \"week\": -1}}";
