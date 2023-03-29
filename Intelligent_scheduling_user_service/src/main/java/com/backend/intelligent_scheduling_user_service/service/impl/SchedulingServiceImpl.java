@@ -1,8 +1,9 @@
 package com.backend.intelligent_scheduling_user_service.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
-import com.backend.intelligent_scheduling_user_service.model.FixedRules;
+import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingByIdResponse;
 import com.backend.intelligent_scheduling_user_service.service.AttendanceCountService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
@@ -16,6 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
 * @author 86136
@@ -75,6 +81,31 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"保存失败，请重试");
         }
         return "保存成功";
+    }
+
+    @Override
+    public List<GetSchedulingByIdResponse> getScheduleById(String id){
+        QueryWrapper<Scheduling> wrapper = new QueryWrapper<>();
+        wrapper.eq("id", id);
+        List<Scheduling> schedulings = schedulingMapper.selectList(wrapper);
+        if (schedulings.size() == 0){
+            throw new BusinessException(ErrorCode.NULL_ERROR,"未找到相关排班");
+        }
+
+        schedulings.forEach(scheduling -> scheduling.setData(JSONObject.parse((String) scheduling.getData())));
+        List<GetSchedulingByIdResponse> responses = new ArrayList<>();
+
+        for (Scheduling scheduling : schedulings) {
+            GetSchedulingByIdResponse response = new GetSchedulingByIdResponse();
+
+            java.util.Date date = scheduling.getDate();
+            java.sql.Date sqlDate = new java.sql.Date(date.getTime());
+
+            response.setDate(sqlDate);
+            response.setData(scheduling.getData());
+            responses.add(response);
+        }
+        return responses;
     }
 
 

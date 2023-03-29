@@ -15,6 +15,7 @@ import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
 import com.backend.intelligent_scheduling_user_service.model.Scheduling;
 import com.backend.intelligent_scheduling_user_service.model.User;
 import com.backend.intelligent_scheduling_user_service.model.request.*;
+import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingByIdResponse;
 import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingData;
 import com.backend.intelligent_scheduling_user_service.model.response.Identify;
 import com.backend.intelligent_scheduling_user_service.model.response.LoginInfo;
@@ -222,6 +223,21 @@ public class UserController {
 
         Object object = scheduling.getScheduleByIdAndDate(id, sqlDate);
         return ResultUtils.success(JSONObject.parse(object.toString()));
+    }
+
+
+    @ApiOperation("获取排班（根据id，返回date和data）")
+    @GetMapping("/getSchedulingById/{id}")
+    public BaseResponse<List<GetSchedulingByIdResponse>> getSchedulingByID(@PathVariable("id") String id) throws ParseException {
+        if (id == null|| StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        List<GetSchedulingByIdResponse> getSchedulingByIdResponse = scheduling.getScheduleById(id);
+        if (getSchedulingByIdResponse == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"获取内容为空");
+        }
+        return ResultUtils.success(getSchedulingByIdResponse);
     }
 
     @ApiOperation("根据店铺id生成排班")

@@ -1,10 +1,13 @@
 package com.backend.intelligent_scheduling_user_service.service;
 
 import com.backend.intelligent_scheduling_user_service.model.Scheduling;
+import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingByIdResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.sql.Date;
+import java.text.ParseException;
+import java.util.List;
 
 /**
 * @author 86136
@@ -22,4 +25,6 @@ public interface SchedulingService extends IService<Scheduling> {
     Object getScheduleByIdAndDate(String id, Date date);
 
     String changeScheduleByIdAndDate(String id,Date date, Object data) throws JsonProcessingException;
+
+    List<GetSchedulingByIdResponse>  getScheduleById(String id) throws ParseException;
 }
