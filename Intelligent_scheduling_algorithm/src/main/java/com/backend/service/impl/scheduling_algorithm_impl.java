@@ -132,7 +132,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         employees = getEmployee(id);
 
         for (int i = 0; i < 5; i++) {
-            if (!JSON.parseObject(scheduling_rules.get(i).getRuleValue()).getJSONArray("type").get(0).equals("-1")) {
+            if ((int)JSON.parseObject(scheduling_rules.get(i).getRuleValue()).getJSONArray("type").get(0) != -1) {
                 switch (scheduling_rules.get(i).getRuleType()) {
                     case "open" :
                         open_rule = JSON.parseObject(scheduling_rules.get(i).getRuleValue());
@@ -437,17 +437,17 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         List<Integer> position = new ArrayList<>();
         //员工的偏好
         List<JSONObject> preference = new ArrayList<>();
-        //员工班次
-        List<Employee_Scheduling> employee_schedulings = new ArrayList<>();
-        for (Employee employee : employees) {
-            position.add(employee.getPosition());
-            preference.add(JSON.parseObject(employee.getPreferenceValue()));
-            Employee_Scheduling employee_scheduling = new Employee_Scheduling();
-            employee_scheduling.setId(employee.getId());
-            employee_schedulings.add(employee_scheduling);
-        }
         //按周排班
         for (int k = 0; k < total_week; k++) {
+            //员工班次
+            List<Employee_Scheduling> employee_schedulings = new ArrayList<>();
+            for (Employee employee : employees) {
+                position.add(employee.getPosition());
+                preference.add(JSON.parseObject(employee.getPreferenceValue()));
+                Employee_Scheduling employee_scheduling = new Employee_Scheduling();
+                employee_scheduling.setId(employee.getId());
+                employee_schedulings.add(employee_scheduling);
+            }
             List<List<List<Employee_Sort>>> employee_sorts = new ArrayList<>();
             //本周第一天的排班表序号
             int index_scheduling;
