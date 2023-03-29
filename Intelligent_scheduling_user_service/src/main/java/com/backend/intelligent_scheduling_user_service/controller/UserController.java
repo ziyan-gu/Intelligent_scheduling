@@ -240,15 +240,18 @@ public class UserController {
         return ResultUtils.success(getSchedulingByIdResponse);
     }
 
-    @ApiOperation("根据店铺id生成排班")
+    @ApiOperation("根据店铺id,一键生成排班（如果出现连接超时：备选http://ip:8432/getScheduling/1_1）")
     @GetMapping("/generateScheduling/{id}")
-    public BaseResponse<Object> getSchedulingByDay(@PathVariable("id") String id){
+    public BaseResponse<String> getSchedulingById(@PathVariable("id") String id){
         if (id == null || StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         Object scheduling = orderFeign.getScheduling(id);
-
-        return ResultUtils.success(JSONObject.parse(scheduling.toString()));
+        if (scheduling == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"貌似没有排班成功");
+        }
+//        return ResultUtils.success(JSONObject.parse(scheduling.toString()));
+        return ResultUtils.success("OK");
     }
 
     @ApiOperation("管理员获取固定排班规则(根据管理员ID)")

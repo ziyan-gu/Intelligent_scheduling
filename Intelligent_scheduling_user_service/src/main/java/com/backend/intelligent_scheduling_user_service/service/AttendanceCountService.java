@@ -11,5 +11,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 * @createDate 2023-03-26 15:22:12
 */
 public interface AttendanceCountService extends IService<AttendanceCount> {
-    void updateAttendanceCount(Scheduling scheduling) throws JsonProcessingException;
+    void updateAttendanceCount(Scheduling scheduling);
+
+    /**
+     * 每天23.30定时启动--统计出勤
+     */
+    void updateAttendanceScheduling();
 }
