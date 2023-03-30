@@ -10,15 +10,14 @@ import com.backend.intelligent_scheduling_user_service.mapper.StoreMapper;
 import com.backend.intelligent_scheduling_user_service.model.Employee;
 import com.backend.intelligent_scheduling_user_service.model.Scheduling;
 import com.backend.intelligent_scheduling_user_service.model.Store;
+import com.backend.intelligent_scheduling_user_service.model.response.GetAttendResponse;
 import com.backend.intelligent_scheduling_user_service.service.EmployeeService;
-import com.backend.intelligent_scheduling_user_service.service.StoreService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.backend.intelligent_scheduling_user_service.model.AttendanceCount;
 import com.backend.intelligent_scheduling_user_service.service.AttendanceCountService;
 import com.backend.intelligent_scheduling_user_service.mapper.AttendanceCountMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -195,6 +194,42 @@ public class AttendanceCountServiceImpl extends ServiceImpl<AttendanceCountMappe
                 }
             }
         }
+    }
+
+    @Override
+    public List<GetAttendResponse> getAttendancesByStore(String storeId) {
+        QueryWrapper<Employee> employeeQueryWrapper = new QueryWrapper<>();
+        employeeQueryWrapper.eq("store", storeId);
+        List<Employee> employees = employeeService.list(employeeQueryWrapper);
+        if (employees.size() == 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该店铺没有员工哦~");
+        }
+
+        List<GetAttendResponse> responses = new ArrayList<>();
+        for (Employee employee : employees) {
+            // 获取该员工的出勤次数
+            QueryWrapper<AttendanceCount> countQueryWrapper = new QueryWrapper<>();
+            countQueryWrapper.eq("id", employee.getId());
+            AttendanceCount attendanceCount = attendanceCountMapper.selectOne(countQueryWrapper);
+
+            // 如果不存在对应的记录，则新建一条记录
+            if (attendanceCount == null) {
+                attendanceCount = new AttendanceCount();
+                attendanceCount.setId(employee.getId());
+                attendanceCount.setCount(0);
+                attendanceCountMapper.insert(attendanceCount);
+            }
+
+            // 构造返回前端的对象
+            GetAttendResponse response = new GetAttendResponse();
+            response.setId(employee.getId());
+            response.setName(employee.getName());
+            response.setCount(attendanceCount.getCount());
+
+            responses.add(response);
+        }
+
+        return responses;
     }
 }
 

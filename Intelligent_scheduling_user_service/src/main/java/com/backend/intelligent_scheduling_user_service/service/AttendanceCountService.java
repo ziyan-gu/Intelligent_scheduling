@@ -2,8 +2,11 @@ package com.backend.intelligent_scheduling_user_service.service;
 
 import com.backend.intelligent_scheduling_user_service.model.AttendanceCount;
 import com.backend.intelligent_scheduling_user_service.model.Scheduling;
+import com.backend.intelligent_scheduling_user_service.model.response.GetAttendResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import java.util.List;
 
 /**
 * @author 86136
@@ -17,4 +20,6 @@ public interface AttendanceCountService extends IService<AttendanceCount> {
      * 每天23.30定时启动--统计出勤
      */
     void updateAttendanceScheduling();
+
+    List<GetAttendResponse> getAttendancesByStore(String storeId);
 }

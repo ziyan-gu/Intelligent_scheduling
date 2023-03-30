@@ -2,9 +2,11 @@ package com.backend.intelligent_scheduling_user_service.service;
 
 import com.backend.intelligent_scheduling_user_service.model.Scheduling;
 import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingByIdResponse;
+import com.backend.intelligent_scheduling_user_service.model.response.GetAllProcessedLayoutResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.List;
@@ -27,4 +29,11 @@ public interface SchedulingService extends IService<Scheduling> {
     String changeScheduleByIdAndDate(String id,Date date, Object data) throws JsonProcessingException;
 
     List<GetSchedulingByIdResponse>  getScheduleById(String id) throws ParseException;
+
+    /**
+     * 获取处理过的门店排班数据
+     * @param id 店铺
+     * @return 员工数据
+     */
+    List<GetAllProcessedLayoutResponse>  getProcessedScheduleById(String id) throws ParseException, IOException;
 }

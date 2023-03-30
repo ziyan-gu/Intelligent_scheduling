@@ -12,26 +12,19 @@ import com.backend.intelligent_scheduling_user_service.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_user_service.feign.OrderFeign;
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
 import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
-import com.backend.intelligent_scheduling_user_service.model.Scheduling;
 import com.backend.intelligent_scheduling_user_service.model.User;
 import com.backend.intelligent_scheduling_user_service.model.request.*;
-import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingByIdResponse;
-import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingData;
-import com.backend.intelligent_scheduling_user_service.model.response.Identify;
-import com.backend.intelligent_scheduling_user_service.model.response.LoginInfo;
-import com.backend.intelligent_scheduling_user_service.service.FixedRulesService;
-import com.backend.intelligent_scheduling_user_service.service.PassengerFlowService;
-import com.backend.intelligent_scheduling_user_service.service.SchedulingService;
-import com.backend.intelligent_scheduling_user_service.service.UserService;
+import com.backend.intelligent_scheduling_user_service.model.response.*;
+import com.backend.intelligent_scheduling_user_service.service.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
-import javafx.scene.input.DataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +49,11 @@ public class UserController {
     public FixedRulesService fixedRulesService;
     @Autowired
     public SchedulingService scheduling;
+
+    @Autowired
+    public AttendanceCountService attendanceCountService;
+
+
     @ApiOperation("用户注册")
     @PostMapping("/register")
     public BaseResponse<String> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
@@ -335,5 +333,37 @@ public class UserController {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"添加失败");
         }
         return ResultUtils.success("ok");
+    }
+
+    @ApiOperation("根据店铺id获取员工的出勤（返回员工id，姓名，出勤次数）")
+    @GetMapping("/getAttendByStoreId/{storeId}")
+    public BaseResponse<List<GetAttendResponse>> getAttendByStoreId(@PathVariable String storeId){
+        if (storeId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        if (StringUtils.isAnyBlank(storeId)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数存在空格或格式不正确");
+        }
+        List<GetAttendResponse> attendanceList = attendanceCountService.getAttendancesByStore(storeId);
+        if (attendanceList == null)
+        {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"获取的出勤表为空");
+        }
+        return ResultUtils.success(attendanceList);
+    }
+
+    @ApiOperation("获取排班处理数据版本（根据id，返回date和data）")
+    @GetMapping("/getProcessedSchedulingById/{id}")
+    public BaseResponse<List<GetAllProcessedLayoutResponse>> getProcessedSchedulingByID(@PathVariable("id") String id) throws ParseException, IOException {
+        if (id == null|| StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        List<GetAllProcessedLayoutResponse> schedulingList = scheduling.getProcessedScheduleById(id);
+
+        if (schedulingList == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"获取内容为空");
+        }
+        return ResultUtils.success(schedulingList);
     }
 }
