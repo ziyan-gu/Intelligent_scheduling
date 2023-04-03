@@ -10,6 +10,7 @@ import com.backend.intelligent_scheduling_user_service.model.request.ModifyStore
 import com.backend.intelligent_scheduling_user_service.service.StoreService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class StoreController {
 
     @ApiOperation("根据管理员id查询店铺")
     @GetMapping("/id/{id}")
+    @Cacheable(value = "storeList", key = "#id")
     public BaseResponse<List<Store>> getStoresById(@PathVariable String id){
         if(id == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");

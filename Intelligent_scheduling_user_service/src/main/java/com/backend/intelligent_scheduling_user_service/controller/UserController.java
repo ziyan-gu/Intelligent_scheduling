@@ -19,12 +19,14 @@ import com.backend.intelligent_scheduling_user_service.service.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,7 +35,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements Serializable {
 
     @Autowired
     public UserService userService;
@@ -226,6 +228,7 @@ public class UserController {
 
     @ApiOperation("获取排班（根据id，返回date和data）")
     @GetMapping("/getSchedulingById/{id}")
+//    @Cacheable(value = "scheduling", key = "#id")
     public BaseResponse<List<GetSchedulingByIdResponse>> getSchedulingByID(@PathVariable("id") String id) throws ParseException {
         if (id == null|| StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
@@ -302,6 +305,7 @@ public class UserController {
 
     @ApiOperation("获取客流量(根据店铺id和日期)")
     @GetMapping("/getPassengerFlow/{id}/and/{date}")
+    @Cacheable(value = "PassengerFlow", key = "#id + '_' + #date")
     public BaseResponse<Object> getPassengerFlow(@PathVariable("id") String id,
                                                        @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws ParseException {
         if (id == null || StringUtils.isAnyBlank(id) || date == null) {
@@ -354,6 +358,7 @@ public class UserController {
 
     @ApiOperation("获取排班处理数据版本（根据id，返回date和data）")
     @GetMapping("/getProcessedSchedulingById/{id}")
+//    @Cacheable(value = "processedScheduling", key = "#id")
     public BaseResponse<List<GetAllProcessedLayoutResponse>> getProcessedSchedulingByID(@PathVariable("id") String id) throws ParseException, IOException {
         if (id == null|| StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");

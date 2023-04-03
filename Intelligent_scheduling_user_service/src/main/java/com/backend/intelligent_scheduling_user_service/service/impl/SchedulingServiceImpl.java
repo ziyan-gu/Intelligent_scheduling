@@ -3,18 +3,15 @@ package com.backend.intelligent_scheduling_user_service.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
+import com.backend.intelligent_scheduling_user_service.mapper.SchedulingMapper;
+import com.backend.intelligent_scheduling_user_service.model.Scheduling;
+import com.backend.intelligent_scheduling_user_service.model.response.GetAllProcessedLayoutResponse;
 import com.backend.intelligent_scheduling_user_service.model.response.GetProcessedLayoutData;
 import com.backend.intelligent_scheduling_user_service.model.response.GetSchedulingByIdResponse;
-import com.backend.intelligent_scheduling_user_service.model.response.GetAllProcessedLayoutResponse;
-import com.backend.intelligent_scheduling_user_service.service.AttendanceCountService;
-import com.backend.intelligent_scheduling_user_service.service.EmployeeService;
+import com.backend.intelligent_scheduling_user_service.service.SchedulingService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.backend.intelligent_scheduling_user_service.model.Scheduling;
-import com.backend.intelligent_scheduling_user_service.service.SchedulingService;
-import com.backend.intelligent_scheduling_user_service.mapper.SchedulingMapper;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,11 +40,6 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
     @Autowired
     private SchedulingMapper schedulingMapper;
 
-    @Autowired
-    private EmployeeService employeeService;
-
-    @Autowired
-    private AttendanceCountService attendanceCountService;
     @Override
     public Object getScheduleByIdAndDate(String id, Date date) {
         QueryWrapper<Scheduling> wrapper = new QueryWrapper<>();

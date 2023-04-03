@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -198,6 +199,7 @@ public class EmployeeController {
 
     @GetMapping(value = "getAll/{storeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("获取所有员工(根据店铺ID)")
+    @Cacheable(value = "employees", key = "#storeId")
     public BaseResponse<List<Employee>> getEmployeeByStoreId(@PathVariable String storeId) {
         if (storeId == null || StringUtils.isAnyBlank(storeId)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求数据为空");
