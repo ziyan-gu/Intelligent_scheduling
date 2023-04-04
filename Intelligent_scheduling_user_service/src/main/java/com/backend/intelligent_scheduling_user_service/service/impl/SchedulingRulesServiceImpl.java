@@ -3,6 +3,11 @@ package com.backend.intelligent_scheduling_user_service.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
+import com.backend.intelligent_scheduling_user_service.model.FixedRules;
+import com.backend.intelligent_scheduling_user_service.model.request.ModifyFixRulesRequest;
+import com.backend.intelligent_scheduling_user_service.model.request.ModifySchedulingRulesRequest;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.backend.intelligent_scheduling_user_service.model.SchedulingRules;
 import com.backend.intelligent_scheduling_user_service.service.SchedulingRulesService;
@@ -12,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
 * @author 86136
@@ -74,6 +80,40 @@ public class SchedulingRulesServiceImpl extends ServiceImpl<SchedulingRulesMappe
         }
 
 
+    }
+
+    @Override
+    public List<SchedulingRules> getSchedulingRules(String id) {
+        QueryWrapper<SchedulingRules> objectQueryWrapper = new QueryWrapper<>();
+        objectQueryWrapper.eq("store", id);
+        List<SchedulingRules> schedulingRulesList = schedulingRulesMapper.selectList(objectQueryWrapper);
+        if(schedulingRulesList == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"未查询到数据");
+        }
+        return schedulingRulesList;
+    }
+
+    @Override
+    public boolean ModifySchedulingRules(List<ModifySchedulingRulesRequest> modifyFixRulesRequests) throws JsonProcessingException {
+        int count = 0;
+        for (ModifySchedulingRulesRequest rule : modifyFixRulesRequests) {
+            UpdateWrapper<SchedulingRules> wrapper = new UpdateWrapper<>();
+            wrapper.eq("rule_type", rule.getRuleType())
+                    .eq("store", rule.getStore());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String value = objectMapper.writeValueAsString((rule.getRuleValue()));
+            SchedulingRules updatedRule = new SchedulingRules();
+            updatedRule.setRuleValue(value);
+
+            int rows = schedulingRulesMapper.update(updatedRule, wrapper);
+            count = count + rows;
+        }
+
+        if(count == 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "没有任何数据被修改");
+        }
+        return true;
     }
 }
 

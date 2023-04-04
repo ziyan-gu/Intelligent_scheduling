@@ -56,9 +56,12 @@ public class SchedulingServiceImpl extends ServiceImpl<SchedulingMapper, Schedul
         String jsonData = objectMapper.writeValueAsString(data);
 
         //是否存在
-//        QueryWrapper<Scheduling> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("id", id).eq("date", date);
-//        Long count = schedulingMapper.selectCount(queryWrapper);
+        QueryWrapper<Scheduling> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id", id).eq("date", date);
+        Long count = schedulingMapper.selectCount(queryWrapper);
+        if(count == 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未找到这个店铺当天的排班");
+        }
 //        if(count == 0){
 //            Scheduling s = new Scheduling();
 //            s.setId(id);

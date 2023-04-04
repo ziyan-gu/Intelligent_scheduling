@@ -21,6 +21,8 @@ spring:
     url: jdbc:mysql://47.108.211.77:3306/Intelligent_scheduling?serverTimezone=UTC
     username: admin
     password: mysqladmin
+  cache:
+    type: redis
   #redis配置
   redis:
     host: 47.243.243.202

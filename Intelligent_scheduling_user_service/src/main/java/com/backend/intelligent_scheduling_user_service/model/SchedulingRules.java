@@ -17,6 +17,7 @@ import org.apache.commons.codec.language.bm.RuleType;
  */
 @TableName(value ="scheduling_rules")
 @Data
+@NoArgsConstructor
 public class SchedulingRules implements Serializable {
     /**
      * 

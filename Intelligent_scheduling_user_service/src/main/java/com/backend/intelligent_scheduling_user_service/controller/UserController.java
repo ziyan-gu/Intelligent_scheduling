@@ -12,6 +12,7 @@ import com.backend.intelligent_scheduling_user_service.feign.EmployeeFeign;
 import com.backend.intelligent_scheduling_user_service.feign.OrderFeign;
 import com.backend.intelligent_scheduling_user_service.model.FixedRules;
 import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
+import com.backend.intelligent_scheduling_user_service.model.SchedulingRules;
 import com.backend.intelligent_scheduling_user_service.model.User;
 import com.backend.intelligent_scheduling_user_service.model.request.*;
 import com.backend.intelligent_scheduling_user_service.model.response.*;
@@ -19,6 +20,7 @@ import com.backend.intelligent_scheduling_user_service.service.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -50,10 +52,13 @@ public class UserController implements Serializable {
     @Resource
     public FixedRulesService fixedRulesService;
     @Autowired
-    public SchedulingService scheduling;
+    public SchedulingService schedulingService;
 
     @Autowired
     public AttendanceCountService attendanceCountService;
+
+    @Autowired
+    public SchedulingRulesService schedulingRulesService;
 
 
     @ApiOperation("用户注册")
@@ -160,6 +165,7 @@ public class UserController implements Serializable {
 
     @ApiOperation("管理员增添门店")
     @PostMapping("/addStore")
+    @CacheEvict(value = "storeList", allEntries = true)
     public BaseResponse<String> addStoreByUser(@RequestBody UserAddStoreRequest userAddStoreRequest) {
         if (userAddStoreRequest == null) {
 //            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
@@ -221,7 +227,7 @@ public class UserController implements Serializable {
         Date newDate = dateFormat.parse(date);
         java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
 
-        Object object = scheduling.getScheduleByIdAndDate(id, sqlDate);
+        Object object = schedulingService.getScheduleByIdAndDate(id, sqlDate);
         return ResultUtils.success(JSONObject.parse(object.toString()));
     }
 
@@ -234,7 +240,7 @@ public class UserController implements Serializable {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
 
-        List<GetSchedulingByIdResponse> getSchedulingByIdResponse = scheduling.getScheduleById(id);
+        List<GetSchedulingByIdResponse> getSchedulingByIdResponse = schedulingService.getScheduleById(id);
         if (getSchedulingByIdResponse == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"获取内容为空");
         }
@@ -271,11 +277,38 @@ public class UserController implements Serializable {
 
     @ApiOperation("管理员修改固定排班规则")
     @PostMapping("/modifyFixedScheduling")
-    public BaseResponse<String> getFixedScheduling(@RequestBody List<ModifyFixRulesRequest> modifyFixRulesRequests) throws JsonProcessingException {
+    public BaseResponse<String> modifyFixedScheduling(@RequestBody List<ModifyFixRulesRequest> modifyFixRulesRequests) throws JsonProcessingException {
         if (modifyFixRulesRequests == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         boolean result = fixedRulesService.ModifyFixRules(modifyFixRulesRequests);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
+        }
+        return ResultUtils.success("ok");
+    }
+
+    @ApiOperation("获取排班规则(根据商店ID)")
+    @GetMapping("/getSchedulingRules/{id}")
+    public BaseResponse<List<Object>> getSchedulingRules(@PathVariable("id") String id){
+        if (id == null || StringUtils.isAnyBlank(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        List<SchedulingRules> schedulingRules = schedulingRulesService.getSchedulingRules(id);
+        schedulingRules.forEach(schedulingRule -> schedulingRule.setRuleValue(JSONObject.parse((String) schedulingRule.getRuleValue())));
+        List<Object> SchedulingRulesResponse = new ArrayList<>();
+        schedulingRules.forEach(schedulingRule -> SchedulingRulesResponse.add(schedulingRule.getRuleValue()));
+
+        return ResultUtils.success(SchedulingRulesResponse);
+    }
+
+    @ApiOperation("修改排班规则")
+    @PostMapping("/modifySchedulingRules")
+    public BaseResponse<String> modifySchedulingRules(@RequestBody List<ModifySchedulingRulesRequest> modifySchedulingRulesRequests) throws JsonProcessingException {
+        if (modifySchedulingRulesRequests == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        boolean result = schedulingRulesService.ModifySchedulingRules(modifySchedulingRulesRequests);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
         }
@@ -296,7 +329,7 @@ public class UserController implements Serializable {
         java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
 
 
-        String result = scheduling.changeScheduleByIdAndDate(id, sqlDate, getSchedulingData.getData());
+        String result = schedulingService.changeScheduleByIdAndDate(id, sqlDate, getSchedulingData.getData());
         if (result == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"修改失败");
         }
@@ -323,6 +356,7 @@ public class UserController implements Serializable {
 
     @ApiOperation("添加客流量(根据id，日期，客流量)")
     @PostMapping("/setPassengerFlow")
+//    @CacheEvict(value = "PassengerFlow", allEntries = true)
     public BaseResponse<String> setPassengerFlow(@RequestBody PassengerFlow passengerFlow) throws JsonProcessingException {
         if (passengerFlow == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
@@ -338,6 +372,8 @@ public class UserController implements Serializable {
         }
         return ResultUtils.success("ok");
     }
+
+
 
     @ApiOperation("根据店铺id获取员工的出勤（返回员工id，姓名，出勤次数）")
     @GetMapping("/getAttendByStoreId/{storeId}")
@@ -364,11 +400,29 @@ public class UserController implements Serializable {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
 
-        List<GetAllProcessedLayoutResponse> schedulingList = scheduling.getProcessedScheduleById(id);
+        List<GetAllProcessedLayoutResponse> schedulingList = schedulingService.getProcessedScheduleById(id);
 
         if (schedulingList == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"获取内容为空");
         }
         return ResultUtils.success(schedulingList);
+    }
+    @ApiOperation("获取各店铺当天的客流量和（传参: id,date")
+    @GetMapping("/getAllPassengerFlowSum/{id}/and/{date}")
+    public BaseResponse<List<GetPassengerFlowSum>> getAllPassengerFlowSum(@PathVariable("id") String id,
+                                                                                    @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws ParseException, IOException {
+        if (id == null|| StringUtils.isAnyBlank(id) || date == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date newDate = simpleDateFormat.parse(date);
+        java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
+
+        List<GetPassengerFlowSum> passengerFlowSum = passengerFlowService.getPassengerFlowSum(id, sqlDate);
+        if (passengerFlowSum == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"获取内容为空");
+        }
+        return ResultUtils.success(passengerFlowSum);
     }
 }

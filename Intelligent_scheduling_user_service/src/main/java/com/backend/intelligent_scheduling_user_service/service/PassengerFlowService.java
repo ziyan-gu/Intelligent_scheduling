@@ -1,10 +1,12 @@
 package com.backend.intelligent_scheduling_user_service.service;
 
 import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
+import com.backend.intelligent_scheduling_user_service.model.response.GetPassengerFlowSum;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.sql.Date;
+import java.util.List;
 
 /**
 * @author 86136
@@ -16,4 +18,6 @@ public interface PassengerFlowService extends IService<PassengerFlow> {
     Object getPassengerFlow(String id, Date date);
 
     boolean setPassengerFlow(String id, Date date, Object data) throws JsonProcessingException;
+
+    List<GetPassengerFlowSum> getPassengerFlowSum(String id, Date date);
 }

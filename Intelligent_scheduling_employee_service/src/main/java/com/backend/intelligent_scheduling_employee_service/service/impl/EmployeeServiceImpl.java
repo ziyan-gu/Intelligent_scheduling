@@ -245,7 +245,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
         QueryWrapper<Employee> queryWrapperEmployees = new QueryWrapper<>();
         queryWrapperEmployees.eq("employee.store", storeId);
         List<Employee> employeeList = employeeMapper.selectList(queryWrapperEmployees);
-        System.out.println("从数据库获取数据");
+//        System.out.println("从数据库获取数据");
         if (employeeList  == null){
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"为查询到数据");
         }

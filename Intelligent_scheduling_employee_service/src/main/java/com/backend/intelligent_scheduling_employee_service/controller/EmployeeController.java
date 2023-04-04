@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ public class EmployeeController {
 
     @DeleteMapping("/{id}")
     @ApiOperation("删除员工")
+    @CacheEvict(value = "employees", allEntries = true)
     public BaseResponse<Boolean> deleteEmployee(@PathVariable String id) {
         if (id == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -150,6 +152,7 @@ public class EmployeeController {
 //    }
     @PutMapping("/prefer/{id}")
     @ApiOperation("更改员工偏好")
+    @CacheEvict(value = "employees", allEntries = true)
     public BaseResponse<Boolean> modifyEmployeePreference(@PathVariable String id, @RequestBody EmployeePreference employeePreference) throws JsonProcessingException {
         if (id == null || StringUtils.isAnyBlank(id)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空或存在非法字符");

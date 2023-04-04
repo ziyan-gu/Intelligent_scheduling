@@ -10,6 +10,7 @@ import com.backend.intelligent_scheduling_user_service.model.request.ModifyStore
 import com.backend.intelligent_scheduling_user_service.service.StoreService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +44,7 @@ public class StoreController {
 
     @ApiOperation("根据店铺id删除店铺")
     @DeleteMapping("/delete/{id}")
+    @CacheEvict(value = "storeList", allEntries = true)
     public BaseResponse<String> deleteStoresById(@PathVariable String id){
         if(id == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
@@ -61,6 +63,7 @@ public class StoreController {
 
     @ApiOperation("根据店铺id修改店铺信息")
     @PutMapping("/modify/{id}")
+    @CacheEvict(value = "storeList", allEntries = true)
     public BaseResponse<String> modifyStoresById(@PathVariable String id,
                                                  @RequestBody ModifyStoreRequest modifyStoreRequest){
         if(modifyStoreRequest == null){

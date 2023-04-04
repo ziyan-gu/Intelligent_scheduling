@@ -1,8 +1,13 @@
 package com.backend.intelligent_scheduling_user_service.service;
 
+import com.backend.intelligent_scheduling_user_service.model.FixedRules;
 import com.backend.intelligent_scheduling_user_service.model.SchedulingRules;
+import com.backend.intelligent_scheduling_user_service.model.request.ModifyFixRulesRequest;
+import com.backend.intelligent_scheduling_user_service.model.request.ModifySchedulingRulesRequest;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import java.util.List;
 
 /**
 * @author 86136
@@ -12,4 +17,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public interface SchedulingRulesService extends IService<SchedulingRules> {
 
     void setDefaultValueScheduling(String store) throws JsonProcessingException;
+
+    List<SchedulingRules> getSchedulingRules(String id);
+
+    boolean ModifySchedulingRules(List<ModifySchedulingRulesRequest> modifyFixRulesRequests) throws JsonProcessingException;
 }
