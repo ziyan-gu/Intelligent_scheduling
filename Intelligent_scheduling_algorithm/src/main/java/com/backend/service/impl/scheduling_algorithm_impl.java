@@ -490,13 +490,13 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     JSONArray dinner = rest_time_rule.getJSONArray("dinner");
                     if (time_1 < (int)lunch.get(0) && time_2 > (int)lunch.get(1)) {
                         JSONArray temp = data.getJSONArray(String.valueOf(i));
-                        int temp_int = (int) temp.get(1) + (int)lunch.get(2);
+                        float temp_int = Float.parseFloat(temp.get(1).toString()) + Float.parseFloat(lunch.get(2).toString());
                         temp.set(1,temp_int);
                         data.put(String.valueOf(i),temp);
                     }
                     else if (time_1 < (int)dinner.get(0) && time_2 > (int)dinner.get(1)) {
                         JSONArray temp = data.getJSONArray(String.valueOf(i));
-                        int temp_int = (int) temp.get(1) + (int)dinner.get(2);
+                        float temp_int = Float.parseFloat(temp.get(1).toString()) + Float.parseFloat(dinner.get(2).toString());
                         temp.set(1,temp_int);
                         data.put(String.valueOf(i),temp);
                     }
