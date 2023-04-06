@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.sql.Date;
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -20,4 +21,8 @@ public interface PassengerFlowService extends IService<PassengerFlow> {
     boolean setPassengerFlow(String id, Date date, Object data) throws JsonProcessingException;
 
     List<GetPassengerFlowSum> getPassengerFlowSum(String id, Date date);
+
+    boolean generatePassengerFlow(String id) throws JsonProcessingException, ParseException;
+
+    List<GetPassengerFlowSum> getPassengerFlowOfWeek(String id, Date date) throws ParseException;
 }

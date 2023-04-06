@@ -425,4 +425,19 @@ public class UserController implements Serializable {
         }
         return ResultUtils.success(passengerFlowSum);
     }
+
+    @ApiOperation("预测客流量(根据id生成一周客流量)")
+    @GetMapping("/generatePassengerFlow/{id}")
+    public BaseResponse<String> generatePassengerFlow(@PathVariable String id) throws JsonProcessingException, ParseException {
+        if (id == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        boolean result = passengerFlowService.generatePassengerFlow(id);
+
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"生成失败");
+        }
+        return ResultUtils.success("ok");
+    }
 }
