@@ -488,17 +488,21 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     int time_2 = (int) current.get(1);
                     JSONArray lunch = rest_time_rule.getJSONArray("lunch");
                     JSONArray dinner = rest_time_rule.getJSONArray("dinner");
-                    if (time_1 < (int)lunch.get(0) && time_2 > (int)lunch.get(1)) {
+                    if (time_1 <= (int)lunch.get(0) && time_2 >= (int)lunch.get(1)) {
                         JSONArray temp = data.getJSONArray(String.valueOf(i));
-                        int temp_int = (int) temp.get(1) + (int)lunch.get(2);
+                        float temp_int = Float.parseFloat(temp.get(1).toString()) + Float.parseFloat(lunch.get(2).toString());
                         temp.set(1,temp_int);
                         data.put(String.valueOf(i),temp);
+//                        scheduling.setData(data.toString());  //覆盖午餐时间，扩大班次时长
+//                        schedulings.set(index,scheduling);
                     }
-                    else if (time_1 < (int)dinner.get(0) && time_2 > (int)dinner.get(1)) {
+                    else if (time_1 <= (int)dinner.get(0) && time_2 >= (int)dinner.get(1)) {
                         JSONArray temp = data.getJSONArray(String.valueOf(i));
-                        int temp_int = (int) temp.get(1) + (int)dinner.get(2);
+                        float temp_int = Float.parseFloat(temp.get(1).toString()) + Float.parseFloat(dinner.get(2).toString());
                         temp.set(1,temp_int);
                         data.put(String.valueOf(i),temp);
+//                        scheduling.setData(data.toString());  //覆盖晚餐时间，扩大班次时长
+//                        schedulings.set(index,scheduling);
                     }
                     //判断是否值班班次
                     int is_onDuty = (int) current.get(3);
