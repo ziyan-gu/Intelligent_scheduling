@@ -138,7 +138,7 @@ public class PassengerFlowServiceImpl extends ServiceImpl<PassengerFlowMapper, P
 
         // 生成一周内的日期
         List<Date> dates = new ArrayList<>();
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 28; i++) {
 //            LocalDate date = currentDate.plusDays(i);
 //            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 //            java.util.Date newDate = dateFormat.parse(String.valueOf(date));
@@ -181,7 +181,7 @@ public class PassengerFlowServiceImpl extends ServiceImpl<PassengerFlowMapper, P
                     // 更新数据
                     UpdateWrapper<PassengerFlow> updateWrapper = new UpdateWrapper<>();
                     updateWrapper.eq("id", id).eq("date", date)
-                            .set("data", jsonData);
+                            .set("data", JSONObject.parse(jsonData));
                     result = passengerFlowMapper.update(null, updateWrapper);
                 } else {
                     // 插入数据

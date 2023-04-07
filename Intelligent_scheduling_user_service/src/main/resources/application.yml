@@ -15,7 +15,12 @@ spring:
         service: userService
         namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
         group: Intelligent_scheduling
-
+  boot:
+    admin:
+      context-path: /admin # 配置Spring Boot Admin Server路径
+      notify:
+        pagerduty:
+          client-url: http://localhost:8430/admin
   cache:
     type: redis
   #redis配置
@@ -48,3 +53,17 @@ spring:
     url: jdbc:mysql://47.108.211.77:3306/Intelligent_scheduling?serverTimezone=UTC
     username: admin
     password: mysqladmin
+#
+#Actuator配置
+management:
+  endpoint:
+    shutdown:
+      enabled: true # 开启端点
+    health:
+      show-details: always # 是否展示健康检查详情
+  endpoints:
+    web:
+      exposure:
+        include: '*' # 暴露所有端点
+
+# http://localhost:8430/actuator/health

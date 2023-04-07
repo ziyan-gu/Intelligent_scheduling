@@ -11,7 +11,12 @@ spring:
         password: nacos528
         namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
         group: Intelligent_scheduling
-
+  boot:
+    admin:
+      context-path: /admin # 配置Spring Boot Admin Server路径
+      notify:
+        pagerduty:
+          client-url: http://localhost:80/admin
     gateway:
       discovery:
         locator:
