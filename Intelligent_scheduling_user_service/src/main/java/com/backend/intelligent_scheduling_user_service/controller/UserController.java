@@ -440,4 +440,22 @@ public class UserController implements Serializable {
         }
         return ResultUtils.success("ok");
     }
+
+    @ApiOperation("获取周客流量(根据id和date获取)")
+    @GetMapping("/getPassengerFlowWeek/{id}/and/{date}")
+    public BaseResponse<List<GetWeekPassengerFlow>> getPassengerFlowWeek(@PathVariable("id") String id,
+                                                     @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws ParseException {
+        if (id == null|| StringUtils.isAnyBlank(id) || date == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date newDate = simpleDateFormat.parse(date);
+        java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
+        List<GetWeekPassengerFlow> passengerFlowOfWeek = passengerFlowService.getPassengerFlowOfWeek(id, sqlDate);
+        if ( passengerFlowOfWeek == null){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"未查询到数据");
+        }
+        return ResultUtils.success(passengerFlowOfWeek);
+    }
 }

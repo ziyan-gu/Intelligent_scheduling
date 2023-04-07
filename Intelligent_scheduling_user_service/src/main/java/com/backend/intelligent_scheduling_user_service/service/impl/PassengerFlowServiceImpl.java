@@ -4,18 +4,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.backend.intelligent_scheduling_user_service.common.ErrorCode;
 import com.backend.intelligent_scheduling_user_service.exception.BusinessException;
+import com.backend.intelligent_scheduling_user_service.mapper.PassengerFlowMapper;
 import com.backend.intelligent_scheduling_user_service.mapper.StoreMapper;
+import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
 import com.backend.intelligent_scheduling_user_service.model.Store;
+import com.backend.intelligent_scheduling_user_service.model.Week;
 import com.backend.intelligent_scheduling_user_service.model.response.GetPassengerFlowSum;
+import com.backend.intelligent_scheduling_user_service.model.response.GetWeekPassengerFlow;
 import com.backend.intelligent_scheduling_user_service.service.PassengerFlowService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
-import com.backend.intelligent_scheduling_user_service.mapper.PassengerFlowMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.cache.Cache;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,10 @@ import javax.annotation.Resource;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -88,7 +92,7 @@ public class PassengerFlowServiceImpl extends ServiceImpl<PassengerFlowMapper, P
         storeQueryWrapper.eq("company", id);
         List<Store> stores = storeMapper.selectList(storeQueryWrapper);
         if (stores.size() == 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"为查询到改公司下的店铺");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"为查询到该公司下的店铺");
         }
 
         List<GetPassengerFlowSum> passengerFlowSums = new ArrayList<>();
@@ -195,42 +199,63 @@ public class PassengerFlowServiceImpl extends ServiceImpl<PassengerFlowMapper, P
         return true;
     }
 
-//    @Override
-//    public List<GetPassengerFlowSum> getPassengerFlowOfWeek(String id, Date date) throws ParseException {
-//        // 计算出对应周的 7 天日期
-//        List<Date> dates = new ArrayList<>();
-//        LocalDate currentDate = date.toLocalDate();
-//        for (int i = 0; i < 7; i++) {
-//            LocalDate d = currentDate.plusDays(i);
-//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//            java.util.Date newDate = dateFormat.parse(String.valueOf(d));
-//            java.sql.Date sqlDate = new java.sql.Date(newDate.getTime());
-//            dates.add(sqlDate);
-//        }
-//
-//        // 查询 passenger_flow 表中的数据
-//        QueryWrapper<PassengerFlow> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.eq("id", id).between("date", dates.get(0), dates.get(6));
-//        List<PassengerFlow> passengerFlows = passengerFlowMapper.selectList(queryWrapper);
-//
-//        // 根据日期汇总
-//        Map<Date, Double> map = passengerFlows.stream()
-//                .collect(Collectors.groupingBy(PassengerFlow::getDate,
-//                        Collectors.summingDouble(pf -> pf.getData().getDouble("Flow"))));
-//
-//        // 封装结果
-//        List<GetPassengerFlowSum> result = new ArrayList<>();
-//        for (Date d : dates) {
-//            Double flow = map.get(d);
-//            if (flow == null) {
-//                flow = 0.0;
-//            }
-//            String week = new SimpleDateFormat("E", Locale.CHINA).format(d);
-//            result.add(new GetPassengerFlowSum(week, flow));
-//        }
-//
-//        return result;
-//    }
+    @Override
+    public List<GetWeekPassengerFlow> getPassengerFlowOfWeek(String id, Date date) {
+        QueryWrapper<Store> storeQueryWrapper = new QueryWrapper<>();
+        storeQueryWrapper.eq("id", id);
+        Store store = storeMapper.selectOne(storeQueryWrapper);
+        if(store == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR,"该店铺不存在");
+        }
+
+        List<PassengerFlow> passengerFlowMapperByWeek = passengerFlowMapper.findByWeek(id, date);
+        List<GetWeekPassengerFlow> passengerFlowWeek = new ArrayList<>();
+        Map<Week, Double> weekMap = new HashMap<>();
+        for(PassengerFlow passengerFlow : passengerFlowMapperByWeek){
+            GetWeekPassengerFlow weekPassengerFlow = new GetWeekPassengerFlow();
+            //设置星期
+            LocalDate dateOfSql = passengerFlow.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            DayOfWeek dayOfWeek = dateOfSql.getDayOfWeek();
+
+            Week week = Week.valueOf(dayOfWeek.toString().toUpperCase());
+            weekMap.put(week, 0.0);
+
+            String dayOfWeekString = dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault());
+            weekPassengerFlow.setWeek(dayOfWeekString);
+
+            //顾客流动数
+            Double sum = 0.0;
+            if (passengerFlow != null) {
+                String dataString = (String) passengerFlow.getData();
+                JSONObject data = JSON.parseObject(dataString);
+                if (data != null) {
+                    for (String key : data.keySet()) {
+                        sum += data.getDouble(key);
+                    }
+                }
+            }
+            weekPassengerFlow.setFlow(sum);
+            passengerFlowWeek.add(weekPassengerFlow);
+        }
+
+
+        // 遍历枚举类型中的所有值，如果对应的值不存在于map中，则在passengerFlowWeek中插入一个值为0的星期
+        for (Week week : Week.values()) {
+            if (!weekMap.containsKey(week)) {
+                GetWeekPassengerFlow weekPassengerFlow = new GetWeekPassengerFlow();
+                weekPassengerFlow.setWeek(week.toString());
+                weekPassengerFlow.setFlow(0.0);
+                passengerFlowWeek.add(weekPassengerFlow);
+            }
+        }
+
+        // 将passengerFlowWeek转换为流并进行排序，根据Week的顺序排序
+//        List<GetWeekPassengerFlow> sortedPassengerFlowWeek = passengerFlowWeek.stream()
+//                .sorted((pw1, pw2) -> Week.valueOf(pw1.getWeek()).compareTo(Week.valueOf(pw2.getWeek())))
+//                .collect(Collectors.toList());
+
+        return passengerFlowWeek;
+    }
 
 
 }

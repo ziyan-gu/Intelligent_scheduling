@@ -2,6 +2,7 @@ package com.backend.intelligent_scheduling_user_service.service;
 
 import com.backend.intelligent_scheduling_user_service.model.PassengerFlow;
 import com.backend.intelligent_scheduling_user_service.model.response.GetPassengerFlowSum;
+import com.backend.intelligent_scheduling_user_service.model.response.GetWeekPassengerFlow;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -24,5 +25,5 @@ public interface PassengerFlowService extends IService<PassengerFlow> {
 
     boolean generatePassengerFlow(String id) throws JsonProcessingException, ParseException;
 
-    List<GetPassengerFlowSum> getPassengerFlowOfWeek(String id, Date date) throws ParseException;
+    List<GetWeekPassengerFlow> getPassengerFlowOfWeek(String id, Date date);
 }
