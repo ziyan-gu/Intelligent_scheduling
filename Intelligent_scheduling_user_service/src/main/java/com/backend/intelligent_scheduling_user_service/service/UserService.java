@@ -42,4 +42,5 @@ public interface UserService extends IService<User> {
 
     String addStore(String account, String name, String company, String address, Float size);
 
+    int UserLogout(HttpServletRequest request);
 }

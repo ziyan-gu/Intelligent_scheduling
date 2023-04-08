@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.backend.intelligent_scheduling_user_service.service.StoreService;
+import io.swagger.annotations.Api;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,8 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
     private UserMapper userMapper;
     @Resource
     private SchedulingRulesMapper schedulingRulesMapper;
+
+
     @Override
     public List<Store> getStoresById(String id) {
 
@@ -118,6 +121,17 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Store getStoreByStoreId(String id) {
+        QueryWrapper<Store> wrapper = new QueryWrapper<>();
+        wrapper.eq("id", id);
+        Store store = storeMapper.selectOne(wrapper);
+        if(store == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未查询到该店铺");
+        }
+        return store;
     }
 }
 

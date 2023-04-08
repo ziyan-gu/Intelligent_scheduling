@@ -63,4 +63,6 @@ public interface EmployeeService extends IService<Employee> {
      * @return 员工
      */
     List<Employee> getEmployeesByStore(String storeId);
+
+    int UserLogout(HttpServletRequest request);
 }

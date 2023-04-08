@@ -28,4 +28,6 @@ public interface StoreService extends IService<Store> {
 
     boolean ModifyStoreById(String id, String name, String address, Float size);
 
+    Store getStoreByStoreId(String id);
+
 }

@@ -23,7 +23,7 @@ public class StoreController {
     @Autowired
     private StoreService storeService;
 
-    @ApiOperation("根据管理员id查询店铺")
+    @ApiOperation("根据管理员id查询店铺门下店铺")
     @GetMapping("/id/{id}")
     @Cacheable(value = "storeList", key = "#id")
     public BaseResponse<List<Store>> getStoresById(@PathVariable String id){
@@ -39,6 +39,24 @@ public class StoreController {
             throw  new BusinessException(ErrorCode.NULL_ERROR,"未查询到数据");
         }
         return ResultUtils.success(stores);
+
+    }
+
+    @ApiOperation("根据店铺id查询店铺相关信息")
+    @GetMapping("/storeId/{id}")
+    public BaseResponse<Store> getStoresByStoreId(@PathVariable String id){
+        if(id == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
+        }
+        if (StringUtils.isAnyBlank(id)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"存在空格");
+        }
+
+        Store store = storeService.getStoreByStoreId(id);
+        if (store == null){
+            throw  new BusinessException(ErrorCode.NULL_ERROR,"未查询到数据");
+        }
+        return ResultUtils.success(store);
 
     }
 

@@ -242,6 +242,13 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
 
     @Override
     public List<Employee> getEmployeesByStore(String storeId) {
+        QueryWrapper<Store> objectQueryWrapper = new QueryWrapper<>();
+        objectQueryWrapper.eq("id", storeId);
+        Store store = storeMapper.selectOne(objectQueryWrapper);
+        if (store == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未找到该店铺");
+        }
+
         QueryWrapper<Employee> queryWrapperEmployees = new QueryWrapper<>();
         queryWrapperEmployees.eq("employee.store", storeId);
         List<Employee> employeeList = employeeMapper.selectList(queryWrapperEmployees);
@@ -250,6 +257,12 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee>
             throw new BusinessException(ErrorCode.SYSTEM_ERROR,"为查询到数据");
         }
         return employeeList;
+    }
+
+    @Override
+    public int UserLogout(HttpServletRequest request) {
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return 1;
     }
 }
 

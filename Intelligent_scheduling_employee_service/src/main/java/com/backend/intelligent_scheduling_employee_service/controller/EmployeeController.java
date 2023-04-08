@@ -83,6 +83,7 @@ public class EmployeeController {
 
     @PostMapping
     @ApiOperation("增加员工(其中：store为店铺id，不然无法正确添加员工编号)")
+    @CacheEvict(value = "employees", allEntries = true)
     public BaseResponse<String> addEmployee(@RequestBody EmployeeNewAddRequest employeeNewAddRequest) {
         if (employeeNewAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -178,6 +179,21 @@ public class EmployeeController {
         }
         Employee employee = employeeService.employeeLogin(email, password, request);
         return ResultUtils.success(employee);
+    }
+
+    @ApiOperation("员工登出")
+    @PostMapping("/logout")
+    public BaseResponse<String> userLogout(HttpServletRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
+        }
+        int result = employeeService.UserLogout(request);
+
+        if (result == 1) {
+            return ResultUtils.success("ok");
+        }
+        return ResultUtils.success("error");
+
     }
 
 //    @PostMapping("/logins")

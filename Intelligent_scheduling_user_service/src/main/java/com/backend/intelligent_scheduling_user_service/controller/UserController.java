@@ -139,6 +139,20 @@ public class UserController implements Serializable {
         return ResultUtils.success(user);
 
     }
+
+    @PostMapping("/logout")
+    @ApiOperation("用户退出")
+    public BaseResponse<String> userLogout(HttpServletRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR,"请求数据为空");
+        }
+        int result = userService.UserLogout(request);
+        if (result == 1) {
+            return ResultUtils.success("ok");
+        }
+        return ResultUtils.success("error");
+    }
+
     @ApiOperation("用户改密")
     @PostMapping("/changePassword")
     public BaseResponse<String> changePasswordByAccount(@RequestBody ChangePasswordRequest changePasswordRequest){
