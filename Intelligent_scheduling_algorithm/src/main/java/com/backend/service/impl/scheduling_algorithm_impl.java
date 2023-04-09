@@ -449,6 +449,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 employee_scheduling.setId(employee.getId());
                 employee_schedulings.add(employee_scheduling);
             }
+            //一周的班次表，内为员工id和优先级
             List<List<List<Employee_Sort>>> employee_sorts = new ArrayList<>();
             //本周第一天的排班表序号
             int index_scheduling;
@@ -465,6 +466,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             Date first_date = Date.valueOf(schedulings.get(index_scheduling).getDate());
             String first_day = sdf.format(first_date);
             int first_day_int = week_list.indexOf(first_day) + 1;
+            //当前周每天排班
             for (int z = 0, index = index_scheduling; z < num_day.get(k); z++, index++) {
                 //当天班次
                 Scheduling scheduling = schedulings.get(index);
@@ -478,9 +480,10 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 //限定职位
                 new JSONArray();
                 JSONArray limit_position;
-                //每个班次拥有的员工
+                //当天所有班次拥有的员工
                 List<List<Employee_Sort>> employee_sort = new ArrayList<>();
                 int week_int = week_list.indexOf(current_week) + 1;
+                //将所有员工排入班次表中
                 for (int i = 1; i <= total; i++) {
                     new JSONArray();
                     JSONArray current = (JSONArray) data.get(String.valueOf(i));
@@ -570,10 +573,11 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             }
             //将所有员工排班信息转换为Map
             Map<String, Employee_Scheduling> employee_schedulingMap = employee_schedulings.stream().collect(Collectors.toMap(Employee_Scheduling::getId, Function.identity()));
-            //对员工进行优先级筛选及规则匹配
+            //对所有员工遍历，进行优先级筛选及规则匹配
             for (int h = 0; h < employee_schedulings.size(); h++) {
                 Employee_Scheduling employee_scheduling = employee_schedulings.get(h);
 //                List<List<Employee_Sort>> employee_sort_day = employee_sorts.get(h);
+                //对当前员工一周遍历
                 for (int i = 0; i < 7; i++) {
                     day_time.set(h, 0);
                     if (i == 0 && employee_scheduling.getMonday() != null) {
@@ -666,82 +670,83 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         int temp_index;
         //按优先级排序
         sort_scheduling(employee_nowData);
+        //按当前员工遍历当天所有班次
         for (int t = 0; t < employee_nowData.size(); t++) {
             //超过每天/每周时长
-            if (day_time.get(h) > (int) working_hours_rule.get("b")) {
-                switch (key) {
-                    case 1 : {
-                        employee_schedulings.get(h).setMonday(null);
-                        break;
-                    }
-                    case 2 : {
-                        employee_schedulings.get(h).setTuesday(null);
-                        break;
-                    }
-                    case 3 : {
-                        employee_schedulings.get(h).setWednesday(null);
-                        break;
-                    }
-                    case 4 : {
-                        employee_schedulings.get(h).setThursday(null);
-                        break;
-                    }
-                    case 5 : {
-                        employee_schedulings.get(h).setFriday(null);
-                        break;
-                    }
-                    case 6 : {
-                        employee_schedulings.get(h).setSaturday(null);
-                        break;
-                    }
-                    case 7 : {
-                        employee_schedulings.get(h).setSunday(null);
-                        break;
-                    }
-                }
-                List<List<Integer>> op = new ArrayList<>();
-                for (int l = 0; l < employee_sorts.get(i + 1 - first_day_int).size(); l++) {
-                    for (int m = employee_sorts.get(i + 1 - first_day_int).get(l).size() - 1; m > 0; m--) {
-                        if (employee_sorts.get(i + 1 - first_day_int).get(l).get(m).getEmployeeId().equals(employee_scheduling.getId())) {
-                            List<Integer> op_t = new ArrayList<>();
-                            op_t.add(l);
-                            op_t.add(m);
-                            op.add(op_t);
-                        }
-                    }
-                }
-                for (List<Integer> integers : op) {
-                    employee_sorts.get(i + 1 - first_day_int).get(integers.get(0)).remove((int) integers.get(1));
-                }
-                break;
-            }
-            else if (week_time.get(h) > (int) working_hours_rule.get("a")) {
-                employee_schedulings.get(h).setMonday(null);
-                employee_schedulings.get(h).setTuesday(null);
-                employee_schedulings.get(h).setWednesday(null);
-                employee_schedulings.get(h).setSaturday(null);
-                employee_schedulings.get(h).setFriday(null);
-                employee_schedulings.get(h).setThursday(null);
-                employee_schedulings.get(h).setSunday(null);
-                List<List<Integer>> op = new ArrayList<>();
-                for (int j = 0; j < employee_sorts.size(); j++) {
-                    for (int k = 0; k < employee_sorts.get(j).size(); k++) {
-                        for (int n = employee_sorts.get(j).get(k).size() - 1; n > 0; n--) {
-                            if (employee_sorts.get(j).get(k).get(n).getEmployeeId().equals(employee_scheduling.getId())) {
-                                List<Integer> op_t = new ArrayList<>();
-                                op_t.add(j);
-                                op_t.add(k);
-                                op_t.add(n);
-                                op.add(op_t);
-                            }
-                        }
-                    }
-                }
-                for (List<Integer> integers : op) {
-                    employee_sorts.get(integers.get(0)).get(integers.get(1)).remove((int) integers.get(2));
-                }
-                break;
-            }
+//            if (day_time.get(h) > (int) working_hours_rule.get("b")) {
+//                switch (key) {
+//                    case 1 : {
+//                        employee_schedulings.get(h).setMonday(null);
+//                        break;
+//                    }
+//                    case 2 : {
+//                        employee_schedulings.get(h).setTuesday(null);
+//                        break;
+//                    }
+//                    case 3 : {
+//                        employee_schedulings.get(h).setWednesday(null);
+//                        break;
+//                    }
+//                    case 4 : {
+//                        employee_schedulings.get(h).setThursday(null);
+//                        break;
+//                    }
+//                    case 5 : {
+//                        employee_schedulings.get(h).setFriday(null);
+//                        break;
+//                    }
+//                    case 6 : {
+//                        employee_schedulings.get(h).setSaturday(null);
+//                        break;
+//                    }
+//                    case 7 : {
+//                        employee_schedulings.get(h).setSunday(null);
+//                        break;
+//                    }
+//                }
+//                List<List<Integer>> op = new ArrayList<>();
+//                for (int l = 0; l < employee_sorts.get(i + 1 - first_day_int).size(); l++) {
+//                    for (int m = employee_sorts.get(i + 1 - first_day_int).get(l).size() - 1; m > 0; m--) {
+//                        if (employee_sorts.get(i + 1 - first_day_int).get(l).get(m).getEmployeeId().equals(employee_scheduling.getId())) {
+//                            List<Integer> op_t = new ArrayList<>();
+//                            op_t.add(l);
+//                            op_t.add(m);
+//                            op.add(op_t);
+//                        }
+//                    }
+//                }
+//                for (List<Integer> integers : op) {
+//                    employee_sorts.get(i + 1 - first_day_int).get(integers.get(0)).remove((int) integers.get(1));
+//                }
+//                break;
+//            }
+//            else if (week_time.get(h) > (int) working_hours_rule.get("a")) {
+//                employee_schedulings.get(h).setMonday(null);
+//                employee_schedulings.get(h).setTuesday(null);
+//                employee_schedulings.get(h).setWednesday(null);
+//                employee_schedulings.get(h).setSaturday(null);
+//                employee_schedulings.get(h).setFriday(null);
+//                employee_schedulings.get(h).setThursday(null);
+//                employee_schedulings.get(h).setSunday(null);
+//                List<List<Integer>> op = new ArrayList<>();
+//                for (int j = 0; j < employee_sorts.size(); j++) {
+//                    for (int k = 0; k < employee_sorts.get(j).size(); k++) {
+//                        for (int n = employee_sorts.get(j).get(k).size() - 1; n > 0; n--) {
+//                            if (employee_sorts.get(j).get(k).get(n).getEmployeeId().equals(employee_scheduling.getId())) {
+//                                List<Integer> op_t = new ArrayList<>();
+//                                op_t.add(j);
+//                                op_t.add(k);
+//                                op_t.add(n);
+//                                op.add(op_t);
+//                            }
+//                        }
+//                    }
+//                }
+//                for (List<Integer> integers : op) {
+//                    employee_sorts.get(integers.get(0)).get(integers.get(1)).remove((int) integers.get(2));
+//                }
+//                break;
+//            }
 
             new JSONArray();
             JSONArray current_scheduling;
@@ -999,7 +1004,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             for (int j = 0; j < time_temp.size(); j++) {
                 int time_temp_1 = (int) data_obj.getJSONArray(String.valueOf(time_temp.get(j).get(0))).get(0);
                 int time_temp_2 = (int) data_obj.getJSONArray(String.valueOf(time_temp.get(j).get(0))).get(1);
-                if (time_1 < time_temp_2 && time_2 > time_temp_1 && !employee_schedulings.get(j).getId().equals(employee_id)) {
+                if (time_1 < time_temp_2 && time_2 > time_temp_1 && !employee_schedulings.get(index_employee).getId().equals(employee_id)) {
 
                     List<Integer> op = new ArrayList<>();
                     for (int m = employee_sorts.get(i + 1 - first_day_int).get( (int) time_temp.get(j).get(0) - 1).size() - 1; m >= 0 ; m--) {
