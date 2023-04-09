@@ -421,7 +421,7 @@ public class UserController implements Serializable {
         }
         return ResultUtils.success(schedulingList);
     }
-    @ApiOperation("获取各店铺当天的客流量和（传参: id,date")
+    @ApiOperation("获取各店铺当天的客流量和(传参: id,date)")
     @GetMapping("/getAllPassengerFlowSum/{id}/and/{date}")
     public BaseResponse<List<GetPassengerFlowSum>> getAllPassengerFlowSum(@PathVariable("id") String id,
                                                                                     @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") String date) throws ParseException, IOException {

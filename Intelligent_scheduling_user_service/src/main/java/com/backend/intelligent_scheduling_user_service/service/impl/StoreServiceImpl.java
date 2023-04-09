@@ -101,6 +101,7 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
     }
 
     @Override
+    @Transactional
     public boolean ModifyStoreById(String id, String name, String address, Float size) {
         //是否存在
         QueryWrapper<Store> wrapper = new QueryWrapper<>();
@@ -111,14 +112,21 @@ public class StoreServiceImpl extends ServiceImpl<StoreMapper, Store>
         }
 
         //更新信息
-        UpdateWrapper<Store> objectUpdateWrapper = new UpdateWrapper<>();
-        objectUpdateWrapper.eq("id", id).set("name", name).
+        UpdateWrapper<Store> storeUpdateWrapper = new UpdateWrapper<>();
+        UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
+        storeUpdateWrapper.eq("id", id).set("name", name).
                 set("address", address).
                 set("size", size);
         Store store = new Store();
-        int update = storeMapper.update(store, objectUpdateWrapper);
+        int update = storeMapper.update(store, storeUpdateWrapper);
         if(update == 0){
-            return false;
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"Store update failed");
+        }
+        User user = new User();
+        userUpdateWrapper.eq("id", id).set("name", name);
+        int update1 = userMapper.update(user, userUpdateWrapper);
+        if(update1 == 0){
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"User update failed");
         }
         return true;
     }

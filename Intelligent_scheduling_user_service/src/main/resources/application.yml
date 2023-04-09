@@ -1,6 +1,8 @@
 server:
   port: 8430
 spring:
+#  profiles:
+#    active: dev
   application:
     name: userService
   mvc:
@@ -67,3 +69,4 @@ management:
         include: '*' # 暴露所有端点
 
 # http://localhost:8430/actuator/health
+
