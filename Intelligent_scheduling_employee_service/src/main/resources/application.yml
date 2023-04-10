@@ -1,5 +1,10 @@
 server:
   port: 8431
+  ssl:
+    enabled: true
+    key-store: classpath:cert/camellia.icu.pfx
+    key-store-password: 9qsris09
+    key-store-type: PKCS12
 spring:
   application:
     name: employeeService
