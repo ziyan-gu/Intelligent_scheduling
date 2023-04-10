@@ -27,7 +27,7 @@ spring:
       context-path: /admin # 配置Spring Boot Admin Server路径
       notify:
         pagerduty:
-          client-url: http://localhost:8430/admin
+          client-url: https://localhost:8430/admin
   cache:
     type: redis
   #redis配置

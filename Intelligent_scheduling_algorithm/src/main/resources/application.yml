@@ -12,7 +12,7 @@ spring:
       context-path: /admin # 配置Spring Boot Admin Server路径
       notify:
         pagerduty:
-          client-url: http://localhost:8432/admin
+          client-url: https://localhost:8432/admin
   cloud:
     nacos:
       discovery:

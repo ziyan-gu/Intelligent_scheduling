@@ -24,7 +24,7 @@ spring:
       context-path: /admin # 配置Spring Boot Admin Server路径
       notify:
         pagerduty:
-          client-url: http://localhost:8443/admin
+          client-url: https://localhost:8443/admin
     gateway:
       discovery:
         locator:
