@@ -8,11 +8,11 @@ import java.util.List;
 @Data
 public class Employee_Scheduling {
     private String id;
-    List<JSONArray> monday;
-    List<JSONArray> tuesday;
-    List<JSONArray> wednesday;
-    List<JSONArray> thursday;
-    List<JSONArray> friday;
-    List<JSONArray> saturday;
-    List<JSONArray> sunday;
+    private List<JSONArray> monday;
+    private List<JSONArray> tuesday;
+    private List<JSONArray> wednesday;
+    private List<JSONArray> thursday;
+    private List<JSONArray> friday;
+    private List<JSONArray> saturday;
+    private List<JSONArray> sunday;
 }

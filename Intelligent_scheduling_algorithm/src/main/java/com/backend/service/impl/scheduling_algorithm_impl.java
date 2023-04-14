@@ -811,6 +811,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 }
             }
             int select = employee_sort.getPriority() + num;
+            //遍历当前班次所有员工
             for (int l = 1; l < employee_sort_temp.size(); l++) {
                 Employee_Sort temp = employee_sort_temp.get(l);
                 String temp_employee_id = temp.getEmployeeId();
