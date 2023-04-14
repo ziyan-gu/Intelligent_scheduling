@@ -123,7 +123,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         //获取固定规则
         //固定规则
         List<Fixed_Rules> fixed_rules = getFixed_rule(admin);
-        System.out.println(fixed_rules);
         //获取客流量
         List<Passenger_Flow> passenger_flows = getPassenger_Flow(id);
         //获取自定义规则
@@ -200,7 +199,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             //获取上下班时间
             List<Integer> up_down;
             JSONArray up_down_json;
-            if (week.equals("星期六") || week.equals("星期日")) {
+            if (week.equals("星期六") || week.equals("星期日") || week.equals("Saturday") || week.equals("Sunday")) {
                 up_down_json = (JSONArray) business_hours_rule.get("dayoff");
             }
             else {
@@ -390,7 +389,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     // 生成排班表
     private void generation_scheduling(List<Scheduling> schedulings, List<List<Integer>> up_downs) {
         //星期表
-        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日"));
+        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"));
         //需要排班天数
         int num_scheduling = schedulings.size();
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
@@ -399,7 +398,12 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         if (num_scheduling > 0) {
             Date first_date = Date.valueOf(schedulings.get(0).getDate());
             String first_week = sdf.format(first_date);
-            first_week_int = week_list.indexOf(first_week);
+            if (week_list.indexOf(first_week) > 6) {
+                first_week_int = week_list.indexOf(first_week) - 7;
+            }
+            else {
+                first_week_int = week_list.indexOf(first_week);
+            }
             //共有总周数
             if (num_scheduling <= (7 - first_week_int)) {
                 total_week = 1;
@@ -456,7 +460,13 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             //本周第一天为周几
             Date first_date = Date.valueOf(schedulings.get(index_scheduling).getDate());
             String first_day = sdf.format(first_date);
-            int first_day_int = week_list.indexOf(first_day) + 1;
+            int first_day_int;
+            if (week_list.indexOf(first_day) > 6) {
+                first_day_int = week_list.indexOf(first_day) - 7 + 1;
+            }
+            else {
+                first_day_int = week_list.indexOf(first_day) + 1;
+            }
             //当前周每天排班
             for (int z = 0, index = index_scheduling; z < num_day.get(k); z++, index++) {
                 //当天班次
@@ -473,7 +483,13 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 JSONArray limit_position;
                 //当天所有班次拥有的员工
                 List<List<Employee_Sort>> employee_sort = new ArrayList<>();
-                int week_int = week_list.indexOf(current_week) + 1;
+                int week_int;
+                if (week_list.indexOf(current_week) > 6) {
+                    week_int = week_list.indexOf(current_week) - 7 + 1;
+                }
+                else {
+                    week_int = week_list.indexOf(current_week) + 1;
+                }
                 //将所有员工排入班次表中
                 for (int i = 1; i <= total; i++) {
                     new JSONArray();
