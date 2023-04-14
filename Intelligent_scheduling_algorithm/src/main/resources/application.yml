@@ -26,7 +26,7 @@ spring:
 
 
 server:
-  port: 8432
+  port: 9000
   ssl:
     enabled: true
     key-store: classpath:cert/camellia.icu.pfx
