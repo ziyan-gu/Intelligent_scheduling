@@ -123,6 +123,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         //获取固定规则
         //固定规则
         List<Fixed_Rules> fixed_rules = getFixed_rule(admin);
+        System.out.println(fixed_rules);
         //获取客流量
         List<Passenger_Flow> passenger_flows = getPassenger_Flow(id);
         //获取自定义规则
