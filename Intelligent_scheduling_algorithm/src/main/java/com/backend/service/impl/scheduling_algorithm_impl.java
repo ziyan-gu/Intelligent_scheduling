@@ -323,16 +323,6 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
             scheduling_up.setId(id);
             scheduling_up.setDate(String.valueOf(date));
             scheduling_up.setData(String.valueOf(up_data));
-//            QueryWrapper<Scheduling> wrapper_scheduling = new QueryWrapper<>();
-//            wrapper_scheduling.eq("id",id);
-//            wrapper_scheduling.eq("date",date);
-//
-//            if (schedulingDao.exists(wrapper_scheduling)) {
-//                schedulingDao.update(scheduling_up,wrapper_scheduling);
-//            }
-//            else {
-//                schedulingDao.insert(scheduling_up);
-//            }
             schedulings.add(scheduling_up);
             up_downs.add(up_down);
         }
