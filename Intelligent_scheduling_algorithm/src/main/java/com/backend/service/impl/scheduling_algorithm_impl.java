@@ -82,8 +82,14 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
         Date current_date = new Date(System.currentTimeMillis());
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
         String week = sdf.format(current_date);
-        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日"));
-        int week_int = week_list.indexOf(week) + 1;
+        List<String> week_list = new ArrayList<>(Arrays.asList("星期一","星期二","星期三","星期四","星期五","星期六","星期日","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"));
+        int week_int;
+        if (week_list.indexOf(week) > 6) {
+            week_int = week_list.indexOf(week) - 6;
+        }
+        else {
+            week_int = week_list.indexOf(week) + 1;
+        }
         Calendar rightNow = Calendar.getInstance();
         rightNow.setTime(current_date);
         rightNow.add(Calendar.DAY_OF_YEAR,1 - week_int);
