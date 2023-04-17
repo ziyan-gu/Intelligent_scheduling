@@ -7,7 +7,7 @@
     <groupId>com.algorithm</groupId>
     <artifactId>Intelligent_scheduling_algorithm</artifactId>
 
-    <version>2.0</version>
+    <version>3.0</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

@@ -212,6 +212,13 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 up_down_json = (JSONArray) business_hours_rule.get("workingday");
             }
             up_down = JSONArray.parseArray(up_down_json.toString(),Integer.class);
+            if ((up_down.get(1) - up_down.get(0)) * 2 > data.size()) {
+                int temp = (up_down.get(1) - up_down.get(0)) * 2 - data.size();
+                int index_k = data.size() + 1;
+                for (int i = 0; i < temp; i++) {
+                    data.put(String.valueOf(index_k + i), 0.1);
+                }
+            }
             //持续时长
             int all_time = up_down.get(1) - up_down.get(0) + open_time + close_time;
             for (int i = 0; i < (up_down.get(1) - up_down.get(0)) * 2;) {
@@ -247,6 +254,15 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                     }
                 }
                 else if (i >= all_time - close_time) {
+                    List<Integer> delete_index = new ArrayList<>();
+                    for (Integer integer : current) {
+                        if (scheduling.get(integer) == long_time) {
+                            delete_index.add(integer);
+                        }
+                    }
+                    for (int j = delete_index.size() - 1; j > -1; j--) {
+                        current.remove(delete_index.get(j));
+                    }
                     List<Integer> short_num = new ArrayList<>();
                     int temp = 0;
                     for (int j = 0 ;j < current.size(); j++) {
@@ -292,6 +308,18 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                             residual_addition(up_down, scheduling, scheduling_time, current, i, short_num, pag);
                         }
 
+                    }
+                    // 人数班次已够，删去多余班次
+                    else {
+                        List<Integer> delete_index_two = new ArrayList<>();
+                        for (Integer integer : current) {
+                            if (!short_num.contains(integer)) {
+                                delete_index_two.add(integer);
+                            }
+                        }
+                        for (int j = delete_index_two.size() - 1; j > -1; j--) {
+                            current.remove(delete_index_two.get(j));
+                        }
                     }
                     if (short_num.size() == 0 && flow.get(i - open_time) == 0) {
                         int temp;
@@ -598,25 +626,25 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 //对当前员工一周遍历
                 for (int i = 0; i < 7; i++) {
                     if (i == 0 && employee_scheduling.getMonday() != null) {
-                        scheduling_done(employee_schedulings,employee_scheduling, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,1);
+                        scheduling_done(employee_schedulings,employee_scheduling, h, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,1);
                     }
                     else if (i == 1 && employee_scheduling.getTuesday() != null) {
-                        scheduling_done(employee_schedulings,employee_scheduling, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,2);
+                        scheduling_done(employee_schedulings,employee_scheduling, h, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,2);
                     }
                     else if (i == 2 && employee_scheduling.getWednesday() != null) {
-                        scheduling_done(employee_schedulings,employee_scheduling, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,3);
+                        scheduling_done(employee_schedulings,employee_scheduling, h, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,3);
                     }
                     else if (i == 3 && employee_scheduling.getThursday() != null) {
-                        scheduling_done(employee_schedulings,employee_scheduling, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,4);
+                        scheduling_done(employee_schedulings,employee_scheduling, h, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,4);
                     }
                     else if (i == 4 && employee_scheduling.getFriday() != null) {
-                        scheduling_done(employee_schedulings,employee_scheduling, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,5);
+                        scheduling_done(employee_schedulings,employee_scheduling, h, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,5);
                     }
                     else if (i == 5 && employee_scheduling.getSaturday() != null) {
-                        scheduling_done(employee_schedulings,employee_scheduling, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,6);
+                        scheduling_done(employee_schedulings,employee_scheduling, h, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,6);
                     }
                     else if (i == 6 && employee_scheduling.getSunday() != null) {
-                        scheduling_done(employee_schedulings,employee_scheduling, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,7);
+                        scheduling_done(employee_schedulings,employee_scheduling, h, employee_overtimes,employee_sorts,i,first_day_int,employee_schedulingMap,index_scheduling,schedulings,7);
                     }
                 }
             }
@@ -648,6 +676,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
     //将员工排班入表
     private void scheduling_done(List<Employee_Scheduling> employee_schedulings,
                                  Employee_Scheduling employee_scheduling,
+                                 int h,
                                  List<Employee_Overtime> employee_overtimes,
                                  List<List<List<Employee_Sort>>> employee_sorts,
                                  int i,
@@ -681,6 +710,351 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                 employee_nowData = employee_scheduling.getSunday();
                 break;
         }
+
+        for (int k = 0; k < employee_nowData.size(); k++) {
+            String employee_id = employee_scheduling.getId();
+
+            JSONObject data_obj = JSON.parseObject(schedulings.get(index_scheduling + i + 1 - first_day_int).getData());
+            int time_temp_1 = (int) data_obj.getJSONArray(String.valueOf(employee_nowData.get(k).get(0))).get(0);
+            int time_temp_2 = (int) data_obj.getJSONArray(String.valueOf(employee_nowData.get(k).get(0))).get(1);
+
+            int day_time = 0;
+            switch (key) {
+                case 1 : {
+                    day_time = employee_overtimes.get(h).getMondayTime();
+                    break;
+                }
+                case 2 : {
+                    day_time = employee_overtimes.get(h).getTuesdayTime();
+                    break;
+                }
+                case 3 : {
+                    day_time = employee_overtimes.get(h).getWednesdayTime();
+                    break;
+                }
+                case 4 : {
+                    day_time = employee_overtimes.get(h).getThursdayTime();
+                    break;
+                }
+                case 5 : {
+                    day_time = employee_overtimes.get(h).getFridayTime();
+                    break;
+                }
+                case 6 : {
+                    day_time = employee_overtimes.get(h).getSaturdayTime();
+                    break;
+                }
+                case 7 : {
+                    day_time = employee_overtimes.get(h).getSundayTime();
+                    break;
+                }
+            }
+            int week_time = employee_overtimes.get(h).getWeekTime();
+            int day;
+            int week;
+            //员工的偏好
+            JSONObject preference = JSON.parseObject(employees.get(h).getPreferenceValue());
+            if ((int)working_hours_rule.get("b") > preference.getJSONObject("shift_duration").getInteger("day")) {
+                if (preference.getJSONObject("shift_duration").getInteger("day") == -1) {
+                    day = (int)working_hours_rule.get("b");
+                }
+                else {
+                    day = preference.getJSONObject("shift_duration").getInteger("day");
+                }
+            }
+            else {
+                day = (int)working_hours_rule.get("b");
+            }
+            if ((int)working_hours_rule.get("a") > preference.getJSONObject("shift_duration").getInteger("week")) {
+                if (preference.getJSONObject("shift_duration").getInteger("week") == -1) {
+                    week = (int)working_hours_rule.get("a");
+                }
+                else {
+                    week = preference.getJSONObject("shift_duration").getInteger("week");
+                }
+            }
+            else {
+                week = (int)working_hours_rule.get("a");
+            }
+            if ((day_time + time_temp_2 - time_temp_1) > day) {
+                List<Integer> op = new ArrayList<>();
+                for (int m = employee_sorts.get(i + 1 - first_day_int).get( (int) employee_nowData.get(k).get(0) - 1).size() - 1; m >= 0 ; m--) {
+                    if (employee_sorts.get(i + 1 - first_day_int).get( (int) employee_nowData.get(k).get(0) - 1).get(m).getEmployeeId().equals(employee_id)) {
+                        op.add(m);
+                    }
+                }
+                for (Integer value : op) {
+                    employee_sorts.get(i + 1 - first_day_int).get( (int) employee_nowData.get(k).get(0) - 1).remove((int) value);
+                }
+                switch (key) {
+                    case 1 : {
+                        employee_schedulings.get(h).getMonday().remove(k);
+                        break;
+                    }
+                    case 2 : {
+                        employee_schedulings.get(h).getTuesday().remove(k);
+                        break;
+                    }
+                    case 3 : {
+                        employee_schedulings.get(h).getWednesday().remove(k);
+                        break;
+                    }
+                    case 4 : {
+                        employee_schedulings.get(h).getThursday().remove(k);
+                        break;
+                    }
+                    case 5 : {
+                        employee_schedulings.get(h).getFriday().remove(k);
+                        break;
+                    }
+                    case 6 : {
+                        employee_schedulings.get(h).getSaturday().remove(k);
+                        break;
+                    }
+                    case 7 : {
+                        employee_schedulings.get(h).getSunday().remove(k);
+                        break;
+                    }
+                }
+                k--;
+            }
+            else if ((week_time + time_temp_2 - time_temp_1) > week) {
+                List<Integer> op = new ArrayList<>();
+                for (int m = employee_sorts.get(i + 1 - first_day_int).get( (int) employee_nowData.get(k).get(0) - 1).size() - 1; m >= 0 ; m--) {
+                    if (employee_sorts.get(i + 1 - first_day_int).get( (int) employee_nowData.get(k).get(0) - 1).get(m).getEmployeeId().equals(employee_id)) {
+                        op.add(m);
+                    }
+                }
+                for (Integer value : op) {
+                    employee_sorts.get(i + 1 - first_day_int).get( (int) employee_nowData.get(k).get(0) - 1).remove((int) value);
+                }
+                switch (key) {
+                    case 1 : {
+                        employee_schedulings.get(h).getMonday().remove(k);
+                        break;
+                    }
+                    case 2 : {
+                        employee_schedulings.get(h).getTuesday().remove(k);
+                        break;
+                    }
+                    case 3 : {
+                        employee_schedulings.get(h).getWednesday().remove(k);
+                        break;
+                    }
+                    case 4 : {
+                        employee_schedulings.get(h).getThursday().remove(k);
+                        break;
+                    }
+                    case 5 : {
+                        employee_schedulings.get(h).getFriday().remove(k);
+                        break;
+                    }
+                    case 6 : {
+                        employee_schedulings.get(h).getSaturday().remove(k);
+                        break;
+                    }
+                    case 7 : {
+                        employee_schedulings.get(h).getSunday().remove(k);
+                        break;
+                    }
+                }
+                k--;
+            }
+        }
+
+        for (int j = 0; j < employee_nowData.size(); j++) {
+            JSONObject data_obj = JSON.parseObject(schedulings.get(index_scheduling + i + 1 - first_day_int).getData());
+            int time_temp_1 = (int) data_obj.getJSONArray(String.valueOf(employee_nowData.get(j).get(0))).get(0);
+            int time_temp_2 = (int) data_obj.getJSONArray(String.valueOf(employee_nowData.get(j).get(0))).get(1);
+
+            for (int index_employee = 0; index_employee < employee_schedulings.size(); index_employee++) {
+
+                if (employee_schedulings.get(index_employee).getId().equals(employee_scheduling.getId())) {
+                    continue;
+                }
+
+                List<JSONArray> jsonArrays = new ArrayList<>();
+                //获取当前员工当天班次信息
+                switch (key) {
+                    case 1 :
+                        jsonArrays = employee_schedulings.get(index_employee).getMonday();
+                        break;
+                    case 2 :
+                        jsonArrays = employee_schedulings.get(index_employee).getTuesday();
+                        break;
+                    case 3 :
+                        jsonArrays = employee_schedulings.get(index_employee).getWednesday();
+                        break;
+                    case 4 :
+                        jsonArrays = employee_schedulings.get(index_employee).getThursday();
+                        break;
+                    case 5 :
+                        jsonArrays = employee_schedulings.get(index_employee).getFriday();
+                        break;
+                    case 6 :
+                        jsonArrays = employee_schedulings.get(index_employee).getSaturday();
+                        break;
+                    case 7 :
+                        jsonArrays = employee_schedulings.get(index_employee).getSunday();
+                        break;
+                }
+                if (jsonArrays == null){
+                    continue;
+                }
+                for (int k = 0; k < jsonArrays.size(); k++) {
+                    if (jsonArrays.get(k).get(0) == employee_nowData.get(j).get(0)) {
+                        String employee_id = employees.get(index_employee).getId();
+
+                        int day_time = 0;
+                        switch (key) {
+                            case 1 : {
+                                day_time = employee_overtimes.get(index_employee).getMondayTime();
+                                break;
+                            }
+                            case 2 : {
+                                day_time = employee_overtimes.get(index_employee).getTuesdayTime();
+                                break;
+                            }
+                            case 3 : {
+                                day_time = employee_overtimes.get(index_employee).getWednesdayTime();
+                                break;
+                            }
+                            case 4 : {
+                                day_time = employee_overtimes.get(index_employee).getThursdayTime();
+                                break;
+                            }
+                            case 5 : {
+                                day_time = employee_overtimes.get(index_employee).getFridayTime();
+                                break;
+                            }
+                            case 6 : {
+                                day_time = employee_overtimes.get(index_employee).getSaturdayTime();
+                                break;
+                            }
+                            case 7 : {
+                                day_time = employee_overtimes.get(index_employee).getSundayTime();
+                                break;
+                            }
+                        }
+                        int week_time = employee_overtimes.get(index_employee).getWeekTime();
+                        int day;
+                        int week;
+                        //员工的偏好
+                        JSONObject preference = JSON.parseObject(employees.get(index_employee).getPreferenceValue());
+                        if ((int)working_hours_rule.get("b") > preference.getJSONObject("shift_duration").getInteger("day")) {
+                            if (preference.getJSONObject("shift_duration").getInteger("day") == -1) {
+                                day = (int)working_hours_rule.get("b");
+                            }
+                            else {
+                                day = preference.getJSONObject("shift_duration").getInteger("day");
+                            }
+                        }
+                        else {
+                            day = (int)working_hours_rule.get("b");
+                        }
+                        if ((int)working_hours_rule.get("a") > preference.getJSONObject("shift_duration").getInteger("week")) {
+                            if (preference.getJSONObject("shift_duration").getInteger("week") == -1) {
+                                week = (int)working_hours_rule.get("a");
+                            }
+                            else {
+                                week = preference.getJSONObject("shift_duration").getInteger("week");
+                            }
+                        }
+                        else {
+                            week = (int)working_hours_rule.get("a");
+                        }
+                        if ((day_time + time_temp_2 - time_temp_1) > day) {
+                            List<Integer> op = new ArrayList<>();
+                            for (int m = employee_sorts.get(i + 1 - first_day_int).get( (int) jsonArrays.get(k).get(0) - 1).size() - 1; m >= 0 ; m--) {
+                                if (employee_sorts.get(i + 1 - first_day_int).get( (int) jsonArrays.get(k).get(0) - 1).get(m).getEmployeeId().equals(employee_id)) {
+                                    op.add(m);
+                                }
+                            }
+                            for (Integer value : op) {
+                                employee_sorts.get(i + 1 - first_day_int).get( (int) jsonArrays.get(k).get(0) - 1).remove((int) value);
+                            }
+                            switch (key) {
+                                case 1 : {
+                                    employee_schedulings.get(index_employee).getMonday().remove(k);
+                                    break;
+                                }
+                                case 2 : {
+                                    employee_schedulings.get(index_employee).getTuesday().remove(k);
+                                    break;
+                                }
+                                case 3 : {
+                                    employee_schedulings.get(index_employee).getWednesday().remove(k);
+                                    break;
+                                }
+                                case 4 : {
+                                    employee_schedulings.get(index_employee).getThursday().remove(k);
+                                    break;
+                                }
+                                case 5 : {
+                                    employee_schedulings.get(index_employee).getFriday().remove(k);
+                                    break;
+                                }
+                                case 6 : {
+                                    employee_schedulings.get(index_employee).getSaturday().remove(k);
+                                    break;
+                                }
+                                case 7 : {
+                                    employee_schedulings.get(index_employee).getSunday().remove(k);
+                                    break;
+                                }
+                            }
+                            k--;
+                        }
+                        else if ((week_time + time_temp_2 - time_temp_1) > week) {
+                            List<Integer> op = new ArrayList<>();
+                            for (int m = employee_sorts.get(i + 1 - first_day_int).get( (int) jsonArrays.get(k).get(0) - 1).size() - 1; m >= 0 ; m--) {
+                                if (employee_sorts.get(i + 1 - first_day_int).get( (int) jsonArrays.get(k).get(0) - 1).get(m).getEmployeeId().equals(employee_id)) {
+                                    op.add(m);
+                                }
+                            }
+                            for (Integer value : op) {
+                                employee_sorts.get(i + 1 - first_day_int).get( (int) jsonArrays.get(k).get(0) - 1).remove((int) value);
+                            }
+                            switch (key) {
+                                case 1 : {
+                                    employee_schedulings.get(index_employee).getMonday().remove(k);
+                                    break;
+                                }
+                                case 2 : {
+                                    employee_schedulings.get(index_employee).getTuesday().remove(k);
+                                    break;
+                                }
+                                case 3 : {
+                                    employee_schedulings.get(index_employee).getWednesday().remove(k);
+                                    break;
+                                }
+                                case 4 : {
+                                    employee_schedulings.get(index_employee).getThursday().remove(k);
+                                    break;
+                                }
+                                case 5 : {
+                                    employee_schedulings.get(index_employee).getFriday().remove(k);
+                                    break;
+                                }
+                                case 6 : {
+                                    employee_schedulings.get(index_employee).getSaturday().remove(k);
+                                    break;
+                                }
+                                case 7 : {
+                                    employee_schedulings.get(index_employee).getSunday().remove(k);
+                                    break;
+                                }
+                            }
+                            k--;
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
         //班次初始索引
         int temp_index;
         //按优先级排序
@@ -1063,7 +1437,23 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                         }
                     }
                     int week_time = employee_overtimes.get(index_employee).getWeekTime();
-                    if ((day_time + time_temp_2 - time_temp_1) > (int)working_hours_rule.get("b")) {
+                    int day;
+                    int week;
+                    //员工的偏好
+                    JSONObject preference = JSON.parseObject(employees.get(index_employee).getPreferenceValue());
+                    if ((int)working_hours_rule.get("b") > preference.getJSONObject("shift_duration").getInteger("day")) {
+                        day = preference.getJSONObject("shift_duration").getInteger("day");
+                    }
+                    else {
+                        day = (int)working_hours_rule.get("b");
+                    }
+                    if ((int)working_hours_rule.get("a") > preference.getJSONObject("shift_duration").getInteger("week")) {
+                        week = preference.getJSONObject("shift_duration").getInteger("week");
+                    }
+                    else {
+                        week = (int)working_hours_rule.get("a");
+                    }
+                    if ((day_time + time_temp_2 - time_temp_1) > day) {
                         List<Integer> op = new ArrayList<>();
                         for (int m = employee_sorts.get(i + 1 - first_day_int).get( (int) time_temp.get(j).get(0) - 1).size() - 1; m >= 0 ; m--) {
                             if (employee_sorts.get(i + 1 - first_day_int).get( (int) time_temp.get(j).get(0) - 1).get(m).getEmployeeId().equals(employee_id)) {
@@ -1105,7 +1495,7 @@ public class scheduling_algorithm_impl implements scheduling_algorithm {
                         }
                         j--;
                     }
-                    else if ((week_time + time_temp_2 - time_temp_1) > (int)working_hours_rule.get("a")) {
+                    else if ((week_time + time_temp_2 - time_temp_1) > week) {
                         List<Integer> op = new ArrayList<>();
                         for (int m = employee_sorts.get(i + 1 - first_day_int).get( (int) time_temp.get(j).get(0) - 1).size() - 1; m >= 0 ; m--) {
                             if (employee_sorts.get(i + 1 - first_day_int).get( (int) time_temp.get(j).get(0) - 1).get(m).getEmployeeId().equals(employee_id)) {
