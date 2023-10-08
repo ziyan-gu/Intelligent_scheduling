@@ -29,9 +29,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.243.243.202:3306/intelligent_scheduling?serverTimezone=UTC
-    username: zhipai
-    password: ASD_123zp
+    url: jdbc:mysql://47.108.211.77:3307/intelligent_scheduling?serverTimezone=UTC
+    username: root
+    password: ZIYAN_0729gsz
   cache:
     type: redis
   #redis配置
