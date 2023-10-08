@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/Intelligent_scheduling_algorithm/target" />
+      <excludeFolder url="file://$MODULE_DIR$/Intelligent_scheduling_user_service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/Intelligent_scheduling_employee_service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/Intelligent_scheduling_gateway/target" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/httpRequests" />
+    </content>
+  </component>
+</module>
