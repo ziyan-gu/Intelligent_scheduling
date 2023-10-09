@@ -14,18 +14,18 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 47.243.243.202:8848
+        server-addr: 47.108.211.77:8848
         username: nacos
-        password: nacos528
+        password: nacos
         service: employeeService
         namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
         group: Intelligent_scheduling
-  boot:
-    admin:
-      context-path: /admin # 配置Spring Boot Admin Server路径
-      notify:
-        pagerduty:
-          client-url: https://localhost:8431/admin
+#  boot:
+#    admin:
+#      context-path: /admin # 配置Spring Boot Admin Server路径
+#      notify:
+#        pagerduty:
+#          client-url: https://localhost:8431/admin
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -36,7 +36,7 @@ spring:
     type: redis
   #redis配置
   redis:
-    host: 47.243.243.202
+    host: 118.89.83.176
     port: 6379
 
 mybatis-plus:
