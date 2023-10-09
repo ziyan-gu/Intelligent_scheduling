@@ -19,12 +19,12 @@ spring:
         password: nacos
         namespace: bb997ae9-99d6-44f9-9336-eff723ba5d03
         group: Intelligent_scheduling
-  boot:
-    admin:
-      context-path: /admin # 配置Spring Boot Admin Server路径
-      notify:
-        pagerduty:
-          client-url: https://localhost:8443/admin
+#  boot:
+#    admin:
+#      context-path: /admin # 配置Spring Boot Admin Server路径
+#      notify:
+#        pagerduty:
+#          client-url: https://localhost:8443/admin
     gateway:
       discovery:
         locator:

@@ -7,12 +7,12 @@ spring:
     url: jdbc:mysql://47.108.211.77:3307/Intelligent_scheduling?serverTimezone=UTC
     username: root
     password: ZIYAN_0729gsz
-  boot:
-    admin:
-      context-path: /admin # 配置Spring Boot Admin Server路径
-      notify:
-        pagerduty:
-          client-url: https://localhost:8432/admin
+#  boot:
+#    admin:
+#      context-path: /admin # 配置Spring Boot Admin Server路径
+#      notify:
+#        pagerduty:
+#          client-url: https://localhost:8432/admin
   cloud:
     nacos:
       discovery:
